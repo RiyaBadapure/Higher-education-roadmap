@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>PathForge — Your Profile</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #03050a;
+      --surface: #0a0e18;
+      --surface2: #111827;
+      --border: rgba(255,255,255,0.07);
+      --accent: #00ffcc;
+      --text: #f0f4ff;
+      --muted: #5a6a85;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Outfit', sans-serif;
+      min-height: 100vh;
+    }
+
+    nav {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 1.2rem 3rem;
+      background: rgba(3,5,10,0.9);
+      border-bottom: 1px solid var(--border);
+      position: sticky; top: 0; z-index: 100;
+    }
+    .logo { font-family: 'Bebas Neue', sans-serif; font-size: 1.7rem; letter-spacing: 0.1em; color: var(--text); text-decoration: none; }
+    .logo em { color: var(--accent); font-style: normal; }
+    .skip-link { font-size: 0.85rem; color: var(--muted); text-decoration: none; }
+    .skip-link:hover { color: var(--text); }
+
+    .progress-wrap { max-width: 580px; margin: 2rem auto; padding: 0 1.5rem; }
+    .steps-row { display: flex; align-items: center; }
+
+    .step-item { display: flex; flex-direction: column; align-items: center; gap: 0.3rem; flex: 1; }
+    .step-circle {
+      width: 34px; height: 34px; border-radius: 50%;
+      border: 2px solid var(--border); background: var(--surface2);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.8rem; font-weight: 600; color: var(--muted); transition: all 0.3s;
+    }
+    .step-item.active .step-circle { border-color: var(--accent); background: rgba(0,255,204,0.1); color: var(--accent); }
+    .step-item.done .step-circle { border-color: var(--accent); background: var(--accent); color: #000; }
+    .step-label { font-size: 0.65rem; color: var(--muted); font-weight: 500; text-align: center; }
+    .step-item.active .step-label { color: var(--accent); }
+    .step-item.done .step-label { color: var(--text); }
+    .step-connector { flex: 1; height: 2px; background: var(--border); margin-bottom: 1.4rem; transition: background 0.3s; }
+    .step-connector.done { background: var(--accent); }
+
+    .card-wrap { max-width: 580px; margin: 0 auto 4rem; padding: 0 1.5rem; }
+    .card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 18px; padding: 2.5rem; position: relative; overflow: hidden;
+    }
+    .card::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+      background: linear-gradient(90deg, transparent, var(--accent), transparent); opacity: 0.4;
+    }
+
+    .panel { display: none; }
+    .panel.active { display: block; animation: up 0.3s ease; }
+    @keyframes up { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+    .panel-icon { font-size: 2rem; margin-bottom: 0.6rem; }
+    .panel-title { font-family: 'Bebas Neue', sans-serif; font-size: 1.8rem; letter-spacing: 0.04em; margin-bottom: 0.25rem; }
+    .panel-sub { font-size: 0.88rem; color: var(--muted); line-height: 1.6; margin-bottom: 1.8rem; font-weight: 300; }
+
+    .avatar-row {
+      display: flex; align-items: center; gap: 1.2rem;
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 12px; padding: 1rem 1.2rem; margin-bottom: 1.5rem;
+    }
+    .avatar-circle {
+      width: 64px; height: 64px; border-radius: 50%;
+      background: linear-gradient(135deg, #00ffcc, #7c4dff);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.8rem; border: 2px solid rgba(0,255,204,0.3); flex-shrink: 0;
+    }
+    .avatar-right { flex: 1; }
+    .avatar-name-display { font-weight: 600; font-size: 0.95rem; margin-bottom: 0.15rem; }
+    .avatar-hint { font-size: 0.75rem; color: var(--muted); margin-bottom: 0.5rem; }
+    .emoji-row { display: flex; flex-wrap: wrap; gap: 0.35rem; }
+    .e-btn {
+      width: 32px; height: 32px; background: var(--surface);
+      border: 1px solid var(--border); border-radius: 6px; font-size: 1rem;
+      cursor: pointer; transition: all 0.15s;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .e-btn:hover { border-color: rgba(0,255,204,0.3); transform: scale(1.1); }
+    .e-btn.sel { border-color: var(--accent); background: rgba(0,255,204,0.08); }
+
+    .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+    .row1 { margin-bottom: 1rem; }
+    .field label { display: block; font-size: 0.72rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin-bottom: 0.4rem; }
+    .field input, .field select, .field textarea {
+      width: 100%; background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 8px; padding: 0.72rem 1rem; color: var(--text);
+      font-family: 'Outfit', sans-serif; font-size: 0.92rem; outline: none; transition: border-color 0.2s;
+    }
+    .field input:focus, .field select:focus, .field textarea:focus { border-color: rgba(0,255,204,0.4); }
+    .field select { appearance: none; cursor: pointer; }
+    .field select option { background: #111827; }
+    .field textarea { resize: none; height: 80px; }
+
+    .divider {
+      font-size: 0.68rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase;
+      color: var(--muted); margin: 1.3rem 0 0.7rem;
+      display: flex; align-items: center; gap: 0.5rem;
+    }
+    .divider::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+    .chip-wrap { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+    .chip {
+      padding: 0.38rem 0.85rem; border-radius: 100px; border: 1px solid var(--border);
+      background: var(--surface2); font-size: 0.8rem; color: var(--muted);
+      cursor: pointer; transition: all 0.15s; font-family: 'Outfit', sans-serif; user-select: none;
+    }
+    .chip:hover { border-color: rgba(0,255,204,0.25); color: var(--text); }
+    .chip.sel { background: rgba(0,255,204,0.08); border-color: rgba(0,255,204,0.4); color: var(--accent); }
+
+    .int-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.65rem; }
+    .int-card {
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 10px; padding: 1rem 0.6rem; text-align: center;
+      cursor: pointer; transition: all 0.2s; user-select: none;
+    }
+    .int-card:hover { border-color: rgba(0,255,204,0.2); transform: translateY(-2px); }
+    .int-card.sel { background: rgba(0,255,204,0.06); border-color: rgba(0,255,204,0.4); }
+    .int-icon { font-size: 1.4rem; margin-bottom: 0.35rem; }
+    .int-label { font-size: 0.73rem; font-weight: 500; color: var(--muted); line-height: 1.3; }
+    .int-card.sel .int-label { color: var(--accent); }
+
+    .hint-box {
+      font-size: 0.8rem; color: var(--accent);
+      background: rgba(0,255,204,0.05); border: 1px solid rgba(0,255,204,0.15);
+      border-radius: 8px; padding: 0.6rem 1rem; margin-bottom: 1rem;
+    }
+
+    .goal-list { display: flex; flex-direction: column; gap: 0.6rem; }
+    .goal-card {
+      display: flex; align-items: center; gap: 1rem;
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 10px; padding: 0.9rem 1.1rem;
+      cursor: pointer; transition: all 0.2s; user-select: none;
+    }
+    .goal-card:hover { border-color: rgba(0,255,204,0.2); }
+    .goal-card.sel { background: rgba(0,255,204,0.05); border-color: rgba(0,255,204,0.35); }
+    .goal-emoji { font-size: 1.3rem; flex-shrink: 0; }
+    .goal-info { flex: 1; }
+    .goal-title { font-size: 0.88rem; font-weight: 600; margin-bottom: 0.15rem; }
+    .goal-desc { font-size: 0.74rem; color: var(--muted); }
+    .goal-check {
+      width: 22px; height: 22px; border-radius: 50%; border: 2px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.7rem; color: transparent; transition: all 0.2s; flex-shrink: 0;
+    }
+    .goal-card.sel .goal-check { background: var(--accent); border-color: var(--accent); color: #000; }
+
+    .sum-card { background: var(--surface2); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; margin-bottom: 1rem; }
+    .sum-head { padding: 0.8rem 1.2rem; border-bottom: 1px solid var(--border); font-size: 0.72rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+    .sum-avatar-row { display: flex; align-items: center; gap: 1rem; padding: 1rem 1.2rem; border-bottom: 1px solid var(--border); }
+    .sum-av { width: 50px; height: 50px; border-radius: 50%; background: linear-gradient(135deg, #00ffcc, #7c4dff); display: flex; align-items: center; justify-content: center; font-size: 1.4rem; border: 2px solid rgba(0,255,204,0.3); }
+    .sum-name { font-weight: 600; font-size: 0.95rem; }
+    .sum-email { font-size: 0.78rem; color: var(--muted); }
+    .sum-body { padding: 0.5rem 1.2rem; }
+    .sum-row { display: flex; justify-content: space-between; align-items: flex-start; padding: 0.5rem 0; border-bottom: 1px solid rgba(255,255,255,0.04); font-size: 0.85rem; gap: 1rem; }
+    .sum-row:last-child { border-bottom: none; }
+    .sum-key { color: var(--muted); flex-shrink: 0; }
+    .sum-val { color: var(--text); font-weight: 500; text-align: right; }
+
+    .btn-row { display: flex; gap: 0.8rem; margin-top: 2rem; }
+    .btn-back {
+      background: var(--surface2); color: var(--muted); border: 1px solid var(--border);
+      border-radius: 8px; padding: 0.85rem 1.5rem;
+      font-family: 'Outfit', sans-serif; font-size: 0.9rem; font-weight: 500;
+      cursor: pointer; transition: all 0.2s;
+    }
+    .btn-back:hover { color: var(--text); }
+    .btn-next {
+      flex: 1; background: var(--accent); color: #000; border: none;
+      border-radius: 8px; padding: 0.85rem;
+      font-family: 'Outfit', sans-serif; font-size: 0.95rem; font-weight: 700;
+      cursor: pointer; transition: all 0.25s;
+    }
+    .btn-next:hover { transform: translateY(-2px); box-shadow: 0 0 20px rgba(0,255,204,0.3); }
+
+    #toast {
+      position: fixed; bottom: 2rem; left: 50%; transform: translateX(-50%);
+      background: #1a2235; border: 1px solid rgba(255,77,109,0.5);
+      border-radius: 10px; padding: 0.8rem 1.6rem;
+      font-size: 0.85rem; color: var(--text);
+      z-index: 9999; display: none;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+    }
+
+    #successOverlay {
+      display: none; position: fixed; inset: 0; z-index: 500;
+      background: rgba(3,5,10,0.97);
+      flex-direction: column; align-items: center; justify-content: center;
+      text-align: center; padding: 2rem;
+    }
+    #successOverlay.show { display: flex; }
+    .suc-emoji { font-size: 4rem; animation: bob 0.7s ease-in-out infinite alternate; }
+    @keyframes bob { from { transform: translateY(0); } to { transform: translateY(-14px); } }
+    .suc-title { font-family: 'Bebas Neue', sans-serif; font-size: 3rem; letter-spacing: 0.06em; color: var(--accent); margin: 1rem 0 0.5rem; }
+    .suc-sub { color: var(--muted); font-size: 1rem; max-width: 360px; line-height: 1.7; margin-bottom: 2rem; }
+    .suc-sub strong { color: var(--text); }
+    .btn-go {
+      background: var(--accent); color: #000; border: none; border-radius: 10px;
+      padding: 1rem 2.5rem; font-family: 'Outfit', sans-serif; font-size: 1rem; font-weight: 700;
+      cursor: pointer; transition: all 0.2s;
+    }
+    .btn-go:hover { transform: translateY(-2px); box-shadow: 0 0 25px rgba(0,255,204,0.35); }
+
+    @media (max-width: 600px) {
+      nav { padding: 1rem 1.2rem; }
+      .card { padding: 1.5rem; }
+      .row2 { grid-template-columns: 1fr; }
+      .int-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a href="welcome.html" class="logo">Path<em>Forge</em></a>
+  <a href="index.html" class="skip-link">Skip for now →</a>
+</nav>
+
+<div class="progress-wrap">
+  <div class="steps-row">
+    <div class="step-item active" id="si1"><div class="step-circle" id="sc1">1</div><div class="step-label">Basic Info</div></div>
+    <div class="step-connector" id="cn1"></div>
+    <div class="step-item" id="si2"><div class="step-circle" id="sc2">2</div><div class="step-label">Education</div></div>
+    <div class="step-connector" id="cn2"></div>
+    <div class="step-item" id="si3"><div class="step-circle" id="sc3">3</div><div class="step-label">Interests</div></div>
+    <div class="step-connector" id="cn3"></div>
+    <div class="step-item" id="si4"><div class="step-circle" id="sc4">4</div><div class="step-label">Goals</div></div>
+    <div class="step-connector" id="cn4"></div>
+    <div class="step-item" id="si5"><div class="step-circle" id="sc5">5</div><div class="step-label">Review</div></div>
+  </div>
+</div>
+
+<div class="card-wrap">
+  <div class="card">
+
+    <!-- PANEL 1 -->
+    <div class="panel active" id="p1">
+      <div class="panel-icon">👤</div>
+      <div class="panel-title">Basic Information</div>
+      <div class="panel-sub">Tell us about yourself so we can personalise your experience.</div>
+
+      <div class="avatar-row">
+        <div class="avatar-circle" id="avCircle">🎓</div>
+        <div class="avatar-right">
+          <div class="avatar-name-display" id="avName">Your Name</div>
+          <div class="avatar-hint">Pick an avatar:</div>
+          <div class="emoji-row">
+            <button class="e-btn sel" onclick="pickEmoji(this,'🎓')">🎓</button>
+            <button class="e-btn" onclick="pickEmoji(this,'🚀')">🚀</button>
+            <button class="e-btn" onclick="pickEmoji(this,'💡')">💡</button>
+            <button class="e-btn" onclick="pickEmoji(this,'🔥')">🔥</button>
+            <button class="e-btn" onclick="pickEmoji(this,'⚡')">⚡</button>
+            <button class="e-btn" onclick="pickEmoji(this,'🌟')">🌟</button>
+            <button class="e-btn" onclick="pickEmoji(this,'🎯')">🎯</button>
+            <button class="e-btn" onclick="pickEmoji(this,'🧠')">🧠</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="row2">
+        <div class="field"><label>Full Name *</label><input type="text" id="f_name" placeholder="Your full name" oninput="document.getElementById('avName').textContent=this.value||'Your Name'"/></div>
+        <div class="field"><label>Date of Birth</label><input type="date" id="f_dob"/></div>
+      </div>
+      <div class="row2">
+        <div class="field">
+          <label>Gender</label>
+          <select id="f_gender">
+            <option value="">Prefer not to say</option>
+            <option>Male</option><option>Female</option>
+            <option>Non-binary</option><option>Other</option>
+          </select>
+        </div>
+        <div class="field"><label>Phone</label><input type="tel" id="f_phone" placeholder="+91 XXXXX XXXXX"/></div>
+      </div>
+      <div class="row1 field"><label>City / Location</label><input type="text" id="f_city" placeholder="e.g. Mumbai, India"/></div>
+      <div class="row1 field"><label>Bio (optional)</label><textarea id="f_bio" placeholder="A short intro about yourself..."></textarea></div>
+
+      <div class="btn-row">
+        <button class="btn-next" onclick="next1()">Continue → Education</button>
+      </div>
+    </div>
+
+    <!-- PANEL 2 -->
+    <div class="panel" id="p2">
+      <div class="panel-icon">🏫</div>
+      <div class="panel-title">Education Background</div>
+      <div class="panel-sub">This helps us build the most accurate roadmap for you.</div>
+
+      <div class="row1 field">
+        <label>Current Education Level *</label>
+        <select id="f_edu">
+          <option value="">Select your level</option>
+          <option>10th Grade</option><option>11th / 12th Grade</option>
+          <option>Diploma</option><option>Undergraduate (B.Tech / B.Sc / BA)</option>
+          <option>Postgraduate (M.Tech / MBA)</option>
+          <option>Working Professional</option><option>Gap Year</option>
+        </select>
+      </div>
+      <div class="row2">
+        <div class="field">
+          <label>Stream / Branch</label>
+          <select id="f_stream">
+            <option value="">Select stream</option>
+            <option>Science — PCM</option><option>Science — PCB</option>
+            <option>Commerce</option><option>Arts / Humanities</option>
+            <option>Computer Science / IT</option><option>Mechanical Engineering</option>
+            <option>Civil Engineering</option><option>Electrical / Electronics</option>
+            <option>Other</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Graduation Year</label>
+          <select id="f_year">
+            <option value="">Select year</option>
+            <option>2024</option><option>2025</option><option>2026</option>
+            <option>2027</option><option>2028</option><option>2029</option><option>2030</option>
+          </select>
+        </div>
+      </div>
+      <div class="row1 field"><label>College / School Name</label><input type="text" id="f_college" placeholder="e.g. IIT Bombay / Delhi Public School"/></div>
+      <div class="row2">
+        <div class="field">
+          <label>Study Mode</label>
+          <select id="f_mode">
+            <option value="">No preference</option>
+            <option>Full-time</option><option>Part-time</option>
+            <option>Online / Remote</option><option>Hybrid</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Preferred Country</label>
+          <select id="f_country">
+            <option>India</option><option>USA / Canada</option>
+            <option>UK / Europe</option><option>Australia</option>
+            <option>Germany</option><option>Open to Anywhere</option>
+          </select>
+        </div>
+      </div>
+      <div class="divider">Languages Known</div>
+      <div class="chip-wrap">
+        <span class="chip sel" onclick="this.classList.toggle('sel')">English</span>
+        <span class="chip" onclick="this.classList.toggle('sel')">Hindi</span>
+        <span class="chip" onclick="this.classList.toggle('sel')">Tamil</span>
+        <span class="chip" onclick="this.classList.toggle('sel')">Telugu</span>
+        <span class="chip" onclick="this.classList.toggle('sel')">Marathi</span>
+        <span class="chip" onclick="this.classList.toggle('sel')">Bengali</span>
+        <span class="chip" onclick="this.classList.toggle('sel')">Kannada</span>
+        <span class="chip" onclick="this.classList.toggle('sel')">Gujarati</span>
+        <span class="chip" onclick="this.classList.toggle('sel')">French</span>
+        <span class="chip" onclick="this.classList.toggle('sel')">German</span>
+      </div>
+      <div class="btn-row">
+        <button class="btn-back" onclick="goTo(1)">← Back</button>
+        <button class="btn-next" onclick="next2()">Continue → Interests</button>
+      </div>
+    </div>
+
+    <!-- PANEL 3 -->
+    <div class="panel" id="p3">
+      <div class="panel-icon">💡</div>
+      <div class="panel-title">Your Interests</div>
+      <div class="panel-sub">Select all areas you're curious about. Pick as many as you like!</div>
+      <div class="int-grid">
+        <div class="int-card" onclick="this.classList.toggle('sel')"><div class="int-icon">💻</div><div class="int-label">Software & Tech</div></div>
+        <div class="int-card" onclick="this.classList.toggle('sel')"><div class="int-icon">🤖</div><div class="int-label">AI & Machine Learning</div></div>
+        <div class="int-card" onclick="this.classList.toggle('sel')"><div class="int-icon">📊</div><div class="int-label">Data Science</div></div>
+        <div class="int-card" onclick="this.classList.toggle('sel')"><div class="int-icon">🎨</div><div class="int-label">Design & UX</div></div>
+        <div class="int-card" onclick="this.classList.toggle('sel')"><div class="int-icon">💼</div><div class="int-label">Business & MBA</div></div>
+        <div class="int-card" onclick="this.classList.toggle('sel')"><div class="int-icon">⚕️</div><div class="int-label">Medicine & Health</div></div>
+        <div class="int-card" onclick="this.classList.toggle('sel')"><div class="int-icon">⚖️</div><div class="int-label">Law & Civil Services</div></div>
+        <div class="int-card" onclick="this.classList.toggle('sel')"><div class="int-icon">🏗️</div><div class="int-label">Engineering</div></div>
+        <div class="int-card" onclick="this.classList.toggle('sel')"><div class="int-icon">🎬</div><div class="int-label">Media & Content</div></div>
+        <div class="int-card" onclick="this.classList.toggle('sel')"><div class="int-icon">🔬</div><div class="int-label">Research & Science</div></div>
+        <div class="int-card" onclick="this.classList.toggle('sel')"><div class="int-icon">💰</div><div class="int-label">Finance & Banking</div></div>
+        <div class="int-card" onclick="this.classList.toggle('sel')"><div class="int-icon">🌍</div><div class="int-label">Study Abroad</div></div>
+      </div>
+      <div class="btn-row">
+        <button class="btn-back" onclick="goTo(2)">← Back</button>
+        <button class="btn-next" onclick="goTo(4)">Continue → Goals</button>
+      </div>
+    </div>
+
+    <!-- PANEL 4 -->
+    <div class="panel" id="p4">
+      <div class="panel-icon">🎯</div>
+      <div class="panel-title">Your Goals</div>
+      <div class="panel-sub">What do you want PathForge to help you with?</div>
+      <div class="hint-box">💡 Not sure? Select <strong>all of them</strong> — explore everything at your own pace!</div>
+      <div class="goal-list">
+        <div class="goal-card" onclick="this.classList.toggle('sel')">
+          <div class="goal-emoji">🗺</div>
+          <div class="goal-info"><div class="goal-title">Get a personalized career roadmap</div><div class="goal-desc">Step-by-step plan from my current level to my dream job</div></div>
+          <div class="goal-check">✓</div>
+        </div>
+        <div class="goal-card" onclick="this.classList.toggle('sel')">
+          <div class="goal-emoji">🏫</div>
+          <div class="goal-info"><div class="goal-title">Find the right college or course</div><div class="goal-desc">Discover top colleges in India and abroad for my field</div></div>
+          <div class="goal-check">✓</div>
+        </div>
+        <div class="goal-card" onclick="this.classList.toggle('sel')">
+          <div class="goal-emoji">💼</div>
+          <div class="goal-info"><div class="goal-title">Find a part-time job while studying</div><div class="goal-desc">Earn while I learn with flexible remote or on-campus jobs</div></div>
+          <div class="goal-check">✓</div>
+        </div>
+        <div class="goal-card" onclick="this.classList.toggle('sel')">
+          <div class="goal-emoji">📝</div>
+          <div class="goal-info"><div class="goal-title">Prepare for aptitude & entrance exams</div><div class="goal-desc">Practice quant, verbal, and logical reasoning daily</div></div>
+          <div class="goal-check">✓</div>
+        </div>
+        <div class="goal-card" onclick="this.classList.toggle('sel')">
+          <div class="goal-emoji">🤖</div>
+          <div class="goal-info"><div class="goal-title">Practice AI mock interviews</div><div class="goal-desc">Get ready for placements with real-time AI feedback</div></div>
+          <div class="goal-check">✓</div>
+        </div>
+        <div class="goal-card" onclick="this.classList.toggle('sel')">
+          <div class="goal-emoji">🌍</div>
+          <div class="goal-info"><div class="goal-title">Explore study abroad options</div><div class="goal-desc">Best countries, visas, and scholarships for my field</div></div>
+          <div class="goal-check">✓</div>
+        </div>
+        <div class="goal-card" onclick="this.classList.toggle('sel')">
+          <div class="goal-emoji">🎓</div>
+          <div class="goal-info"><div class="goal-title">I want to explore everything — not sure yet</div><div class="goal-desc">Help me discover what career path suits me best</div></div>
+          <div class="goal-check">✓</div>
+        </div>
+      </div>
+      <div class="btn-row">
+        <button class="btn-back" onclick="goTo(3)">← Back</button>
+        <button class="btn-next" onclick="goTo(5)">Review Profile →</button>
+      </div>
+    </div>
+
+    <!-- PANEL 5 -->
+    <div class="panel" id="p5">
+      <div class="panel-icon">✅</div>
+      <div class="panel-title">Review Your Profile</div>
+      <div class="panel-sub">Everything look good? You can always edit this later.</div>
+      <div class="sum-card">
+        <div class="sum-avatar-row">
+          <div class="sum-av" id="sumAv">🎓</div>
+          <div><div class="sum-name" id="sumName">—</div><div class="sum-email">Registered account</div></div>
+        </div>
+        <div class="sum-body" id="sumBasic"></div>
+      </div>
+      <div class="sum-card">
+        <div class="sum-head">🏫 Education</div>
+        <div class="sum-body" id="sumEdu"></div>
+      </div>
+      <div class="sum-card">
+        <div class="sum-head">💡 Interests & Goals</div>
+        <div class="sum-body" id="sumGoals"></div>
+      </div>
+      <div class="btn-row">
+        <button class="btn-back" onclick="goTo(4)">← Edit</button>
+        <button class="btn-next" onclick="finish()">🚀 Save & Go to Dashboard</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- SUCCESS -->
+<div id="successOverlay">
+  <div class="suc-emoji">🎉</div>
+  <div class="suc-title">Profile Complete!</div>
+  <div class="suc-sub">Welcome to PathForge, <strong id="sucName">Student</strong>!<br>Your personalized roadmap is ready.</div>
+  <button class="btn-go" onclick="window.location.href='index.html'">⚡ Go to My Roadmap</button>
+</div>
+
+<div id="toast"></div>
+
+<script>
+  var curEmoji = '🎓';
+
+  function pickEmoji(btn, emoji) {
+    var btns = document.querySelectorAll('.e-btn');
+    for (var i = 0; i < btns.length; i++) btns[i].classList.remove('sel');
+    btn.classList.add('sel');
+    curEmoji = emoji;
+    document.getElementById('avCircle').textContent = emoji;
+  }
+
+  function showToast(msg) {
+    var t = document.getElementById('toast');
+    t.textContent = msg;
+    t.style.display = 'block';
+    setTimeout(function() { t.style.display = 'none'; }, 3000);
+  }
+
+  function goTo(step) {
+    for (var i = 1; i <= 5; i++) {
+      document.getElementById('p' + i).classList.remove('active');
+      var si = document.getElementById('si' + i);
+      var sc = document.getElementById('sc' + i);
+      si.classList.remove('active', 'done');
+      if (i < step) { si.classList.add('done'); sc.textContent = '✓'; }
+      else if (i === step) { si.classList.add('active'); sc.textContent = i; }
+      else { sc.textContent = i; }
+    }
+    for (var j = 1; j <= 4; j++) {
+      var cn = document.getElementById('cn' + j);
+      if (j < step) { cn.classList.add('done'); }
+      else { cn.classList.remove('done'); }
+    }
+    document.getElementById('p' + step).classList.add('active');
+    if (step === 5) buildSummary();
+    window.scrollTo(0, 0);
+  }
+
+  function next1() {
+    var name = document.getElementById('f_name').value.trim();
+    if (!name) { showToast('⚠️ Please enter your full name'); return; }
+    goTo(2);
+  }
+
+  function next2() {
+    var edu = document.getElementById('f_edu').value;
+    if (!edu) { showToast('⚠️ Please select your education level'); return; }
+    goTo(3);
+  }
+
+  function buildSummary() {
+    document.getElementById('sumAv').textContent = curEmoji;
+    document.getElementById('sumName').textContent = document.getElementById('f_name').value || '—';
+
+    var basicRows = [
+      ['Date of Birth', document.getElementById('f_dob').value || '—'],
+      ['Gender', document.getElementById('f_gender').value || '—'],
+      ['Phone', document.getElementById('f_phone').value || '—'],
+      ['City', document.getElementById('f_city').value || '—'],
+    ];
+    var basicHTML = '';
+    for (var i = 0; i < basicRows.length; i++) {
+      basicHTML += '<div class="sum-row"><span class="sum-key">' + basicRows[i][0] + '</span><span class="sum-val">' + basicRows[i][1] + '</span></div>';
+    }
+    document.getElementById('sumBasic').innerHTML = basicHTML;
+
+    var eduRows = [
+      ['Level', document.getElementById('f_edu').value || '—'],
+      ['Stream', document.getElementById('f_stream').value || '—'],
+      ['College', document.getElementById('f_college').value || '—'],
+      ['Grad Year', document.getElementById('f_year').value || '—'],
+      ['Country', document.getElementById('f_country').value || '—'],
+    ];
+    var eduHTML = '';
+    for (var i = 0; i < eduRows.length; i++) {
+      eduHTML += '<div class="sum-row"><span class="sum-key">' + eduRows[i][0] + '</span><span class="sum-val">' + eduRows[i][1] + '</span></div>';
+    }
+    document.getElementById('sumEdu').innerHTML = eduHTML;
+
+    var intCards = document.querySelectorAll('.int-card.sel');
+    var intArr = [];
+    for (var i = 0; i < intCards.length; i++) intArr.push(intCards[i].querySelector('.int-label').textContent);
+    var interests = intArr.length ? intArr.join(', ') : 'None selected';
+
+    var goalCards = document.querySelectorAll('.goal-card.sel');
+    var goalArr = [];
+    for (var i = 0; i < goalCards.length; i++) goalArr.push(goalCards[i].querySelector('.goal-title').textContent);
+    var goals = goalArr.length ? goalArr.join(', ') : 'None selected';
+
+    document.getElementById('sumGoals').innerHTML =
+      '<div class="sum-row"><span class="sum-key">Interests</span><span class="sum-val">' + interests + '</span></div>' +
+      '<div class="sum-row"><span class="sum-key">Goals</span><span class="sum-val">' + goals + '</span></div>';
+  }
+
+  function finish() {
+  var name = document.getElementById('f_name').value || 'Student';
+  var city = document.getElementById('f_city').value || '';
+  var edu  = document.getElementById('f_edu').value  || '';
+
+  var goalCards = document.querySelectorAll('.goal-card.sel');
+  var goalArr = [];
+  for (var i = 0; i < goalCards.length; i++) goalArr.push(goalCards[i].querySelector('.goal-title').textContent);
+
+  var intCards = document.querySelectorAll('.int-card.sel');
+  var intArr = [];
+  for (var i = 0; i < intCards.length; i++) intArr.push(intCards[i].querySelector('.int-label').textContent);
+
+  localStorage.setItem('pf_name',      name);
+  localStorage.setItem('pf_emoji',     curEmoji);
+  localStorage.setItem('pf_edu',       edu);
+  localStorage.setItem('pf_city',      city);
+  localStorage.setItem('pf_goals',     goalArr.join(', ') || '—');
+  localStorage.setItem('pf_interests', intArr.join(', ')  || '—');
+
+  document.getElementById('sucName').textContent = name;
+  document.getElementById('successOverlay').classList.add('show');
+  setTimeout(function() { window.location.href = 'index.html'; }, 3500);
+}
+</script>
+</body>
+</html>

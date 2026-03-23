@@ -1,57 +1,23 @@
 const express = require("express");
-const educationData = require("./data/educationData");
-
 const app = express();
 const PORT = 3000;
 
-// Home Route
+// Import routes
+const roadmapRoutes = require("./routes/roadmap");
+
+// Middleware
+app.use(express.json());
+app.use(express.static('./frontend', { index: false }));  // ← add index: false
+
+// Use routes with /api prefix
+app.use("/api", roadmapRoutes);
+
+// Always opens welcome.html first
 app.get("/", (req, res) => {
-    res.send("Education Roadmap API is running 🚀");
+  res.sendFile(__dirname + "/frontend/welcome.html");
 });
 
-// Roadmap Route
-app.get("/roadmap", (req, res) => {
-
-    const stream = req.query.stream?.toLowerCase();
-    const degree = req.query.degree?.toLowerCase();
-
-    // If no stream selected
-    if (!stream) {
-        return res.json({
-            message: "Please select a stream",
-            availableStreams: Object.keys(educationData)
-        });
-    }
-
-    // If invalid stream
-    if (!educationData[stream]) {
-        return res.json({
-            message: "Invalid stream selected",
-            availableStreams: Object.keys(educationData)
-        });
-    }
-
-    // If stream selected but no degree
-    if (!degree) {
-        return res.json({
-            message: `Available Degrees in ${stream}`,
-            degrees: educationData[stream].availableDegrees
-        });
-    }
-
-    // If invalid degree
-    if (!educationData[stream][degree]) {
-        return res.json({
-            message: "Invalid degree selected",
-            degrees: educationData[stream].availableDegrees
-        });
-    }
-
-    // If everything correct
-    res.json(educationData[stream][degree]);
-});
-
-// Start Server
+// Start server
 app.listen(PORT, () => {
-    console.log(`Server running on http://localhost:${PORT}`);
+  console.log(`Server running on http://localhost:${PORT}`);
 });

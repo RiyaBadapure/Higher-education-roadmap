@@ -1,333 +1,97 @@
 const educationData = {
-
-    science: {
-        availableDegrees: ["Engineering", "BSc", "BCA", "Medical", "Pure Science"],
-
-        engineering: {
-            path: "After 10th → Science (PCM) → 12th → Engineering",
-            specializations: [
-                "Computer Science Engineering",
-                "Information Technology",
-                "Mechanical Engineering",
-                "Civil Engineering",
-                "Electronics & Communication",
-                "Electrical Engineering"
-            ],
-            higherStudies: [
-                "MTech",
-                "MBA",
-                "MS (Abroad)",
-                "PhD",
-                "PG Diploma in Specialized Technologies"
-            ],
-            careers: [
-                "Software Engineer",
-                "Mechanical Engineer",
-                "Civil Engineer",
-                "Data Scientist",
-                "Government Engineer",
-                "Project Manager"
-            ]
-        },
-
-        bsc: {
-            path: "After 10th → Science → 12th → BSc",
-            specializations: [
-                "Physics",
-                "Chemistry",
-                "Mathematics",
-                "Biotechnology",
-                "Microbiology",
-                "Computer Science"
-            ],
-            higherStudies: [
-                "MSc",
-                "MBA",
-                "MCA",
-                "PhD",
-                "Research Programs"
-            ],
-            careers: [
-                "Research Scientist",
-                "Lab Technician",
-                "Professor",
-                "Quality Analyst",
-                "Data Analyst"
-            ]
-        },
-
-        bca: {
-            path: "After 10th → Science → 12th → BCA",
-            specializations: [
-                "Software Development",
-                "Web Development",
-                "Cyber Security",
-                "Artificial Intelligence",
-                "Data Science"
-            ],
-            higherStudies: [
-                "MCA",
-                "MBA IT",
-                "MS Computer Science",
-                "PhD"
-            ],
-            careers: [
-                "Software Developer",
-                "Web Developer",
-                "System Analyst",
-                "Cyber Security Analyst",
-                "App Developer"
-            ]
-        },
-
-        medical: {
-            path: "After 10th → Science (PCB) → 12th → Medical (MBBS/BDS/BAMS)",
-            higherStudies: [
-                "MD",
-                "MS",
-                "DM",
-                "MCh",
-                "Hospital Administration"
-            ],
-            careers: [
-                "Doctor",
-                "Surgeon",
-                "Dentist",
-                "Medical Officer",
-                "Hospital Administrator"
-            ]
-        },
-
-        "pure science": {
-            path: "After 10th → Science → 12th → Pure Science",
-            specializations: [
-                "Theoretical Physics",
-                "Astrophysics",
-                "Organic Chemistry",
-                "Applied Mathematics",
-                "Environmental Science"
-            ],
-            higherStudies: [
-                "MSc",
-                "PhD",
-                "Research Fellowships"
-            ],
-            careers: [
-                "Scientist",
-                "Research Analyst",
-                "Lab Researcher",
-                "Professor"
-            ]
-        }
+  Science: {
+    engineering: {
+      path: "After 10th --> Science (PCM) --> Engineering (BTECH/BE)",
+      branches: ["Computer Science", "Information Technology", "Mechanical Engineering", "Civil Engineering", "Electronics & Communication"],
+      higherStudies: ["MTech / MSc", "MSc Computer Science", "MSc Data Science", "MSc Artificial Intelligence", "MSc Cyber Security"],
+      careers: ["Software Engineer", "Data Scientist", "AI Engineer", "Systems Analyst", "Government Scientist (ISRO/DRDO/BARC)", "Research Scientist", "Professor / Lecturer", "Quantitative Analyst"]
     },
-
-    commerce: {
-        availableDegrees: ["BCom", "BBA", "BMS", "CA", "BAF", "CS"],
-
-        bcom: {
-            path: "After 10th → Commerce → 12th → BCom",
-            specializations: [
-                "Accounting & Finance",
-                "Banking & Insurance",
-                "Taxation",
-                "Business Management",
-                "Economics"
-            ],
-            higherStudies: [
-                "MCom",
-                "MBA",
-                "CA",
-                "CMA",
-                "CS"
-            ],
-            careers: [
-                "Accountant",
-                "Auditor",
-                "Financial Analyst",
-                "Tax Consultant",
-                "Bank Officer"
-            ]
-        },
-
-        bba: {
-            path: "After 10th → Commerce → 12th → BBA",
-            specializations: [
-                "Marketing",
-                "Finance",
-                "Human Resource",
-                "International Business",
-                "Entrepreneurship"
-            ],
-            higherStudies: [
-                "MBA",
-                "PGDM",
-                "MMS"
-            ],
-            careers: [
-                "Business Manager",
-                "Marketing Executive",
-                "HR Manager",
-                "Entrepreneur"
-            ]
-        },
-
-        bms: {
-            path: "After 10th → Commerce → 12th → BMS",
-            specializations: [
-                "Finance",
-                "Marketing",
-                "Operations",
-                "Human Resource"
-            ],
-            higherStudies: [
-                "MBA",
-                "PGDM",
-                "MMS"
-            ],
-            careers: [
-                "Operations Manager",
-                "Business Analyst",
-                "Marketing Manager"
-            ]
-        },
-
-        ca: {
-            path: "After 10th → Commerce → CA (Chartered Accountant)",
-            higherStudies: [
-                "CPA",
-                "CFA",
-                "Advanced Financial Management"
-            ],
-            careers: [
-                "Chartered Accountant",
-                "Auditor",
-                "Tax Consultant",
-                "Finance Manager"
-            ]
-        },
-
-        baf: {
-            path: "After 10th → Commerce → 12th → BAF",
-            specializations: [
-                "Accounting",
-                "Financial Analysis",
-                "Investment Banking"
-            ],
-            higherStudies: [
-                "MBA Finance",
-                "MCom",
-                "CFA"
-            ],
-            careers: [
-                "Financial Analyst",
-                "Investment Banker",
-                "Account Executive"
-            ]
-        },
-
-        cs: {
-            path: "After 10th → Commerce → CS (Company Secretary)",
-            higherStudies: [
-                "LLB",
-                "MBA",
-                "Corporate Law Specialization"
-            ],
-            careers: [
-                "Company Secretary",
-                "Corporate Advisor",
-                "Compliance Officer"
-            ]
-        }
+    bsc: {
+      path: "After 10th --> Science --> BSc",
+      fields: ["Physics", "Chemistry", "Mathematics", "Computer Science"],
+      higherStudies: ["MSc Physics / Chemistry / Mathematics", "MSc Computer Science"],
+      careers: ["Software Engineer", "Data Scientist", "AI Engineer", "Systems Analyst", "Government Scientist (ISRO/DRDO/BARC)", "Research Scientist", "Professor / Lecturer", "Quantitative Analyst"]
     },
-
-    arts: {
-        availableDegrees: ["BA", "BFA", "BJMC", "LLB"],
-
-        ba: {
-            path: "After 10th → Arts → 12th → BA",
-            specializations: [
-                "English",
-                "Psychology",
-                "Political Science",
-                "Sociology",
-                "History",
-                "Economics"
-            ],
-            higherStudies: [
-                "MA",
-                "MBA",
-                "LLB",
-                "PhD"
-            ],
-            careers: [
-                "Teacher",
-                "Civil Services",
-                "Journalist",
-                "Psychologist",
-                "Social Worker"
-            ]
-        },
-
-        bfa: {
-            path: "After 10th → Arts → 12th → BFA",
-            specializations: [
-                "Painting",
-                "Applied Arts",
-                "Sculpture",
-                "Animation",
-                "Visual Communication"
-            ],
-            higherStudies: [
-                "MFA",
-                "Animation & VFX",
-                "Design Programs"
-            ],
-            careers: [
-                "Graphic Designer",
-                "Animator",
-                "Art Director",
-                "Illustrator"
-            ]
-        },
-
-        bjmc: {
-            path: "After 10th → Arts → 12th → BJMC",
-            specializations: [
-                "Journalism",
-                "Public Relations",
-                "Advertising",
-                "Digital Media"
-            ],
-            higherStudies: [
-                "MJMC",
-                "MBA Media Management",
-                "Film Studies"
-            ],
-            careers: [
-                "Journalist",
-                "News Reporter",
-                "Content Creator",
-                "PR Manager",
-                "Media Planner"
-            ]
-        },
-
-        llb: {
-            path: "After 10th → Arts → 12th → LLB (5 Year Integrated Law)",
-            higherStudies: [
-                "LLM",
-                "PhD in Law",
-                "Judicial Services Preparation"
-            ],
-            careers: [
-                "Advocate",
-                "Legal Advisor",
-                "Judge (after exams)",
-                "Corporate Lawyer",
-                "Public Prosecutor"
-            ]
-        }
+    bca: {
+      path: "After 10th --> Science --> BCA",
+      higherStudies: ["MCA", "MTech (Computer Science / IT)", "PhD in Computer Science", "MSc Data Science", "MSc Cybersecurity", "MBA (IT Management)", "MBA (Business Analytics)"],
+      careers: ["Software Engineer", "Data Scientist", "AIML Engineer", "Systems Analyst", "Government Scientist (ISRO/DRDO/BARC)", "Database Administrator", "Network Administrator", "Cybersecurity Specialist"]
+    },
+    medical: {
+      path: "After 10th --> Science (PCB) --> Medical Field",
+      courses: ["MBBS", "BDS", "BSc Nursing", "B.Pharm"],
+      higherStudies: ["MD / MS / DNB / MPH", "MDS / MBA (Hospital Management)", "MSc Nursing / MHA / MPH / MBA Healthcare", "M.Pharm / Pharm.D / MBA (Pharmaceutical Management) / MSc Pharmacology"],
+      careers: ["Doctor", "Surgeon", "Specialist", "Medical Professor", "Dentist", "ICU Nurse", "Pharmaceutical Researcher"]
+    },
+    "pure science": {
+      path: "After 10th --> Science (PCM/PCB) --> Pure Science",
+      courses: ["BSc Physics", "BSc Chemistry", "BSc Mathematics", "BSc Statistics", "BSc Astronomy", "BSc Geology", "BSc Environmental Science", "BSc Biotechnology"],
+      higherStudies: ["MSc", "Integrated MSc", "MTech", "PhD", "Research Fellowships", "MSc Data Science (for Maths/Stats students)"],
+      careers: ["Research Scientist", "Professor / Lecturer", "Government Scientist (ISRO / DRDO / BARC)", "Data Analyst", "Statistician", "Lab Scientist", "Environmental Scientist", "Astronomer", "Scientific Officer", "Science Writer"]
     }
+  },
+  Commerce: {
+    bcom: {
+      path: "After 10th --> Commerce --> BCom",
+      fields: ["Accounting & Finance", "Banking & Insurance", "Financial Markets", "Economics", "Taxation", "Business Management"],
+      higherStudies: ["MCom", "MBA", "CA", "CMA", "CS", "CFA", "MFM"],
+      careers: ["Accountant", "Financial Analyst", "Auditor", "Tax Consultant", "Banking Officer", "Investment Analyst", "Finance Manager"]
+    },
+    bba: {
+      path: "After 10th --> Commerce --> BBA",
+      fields: ["Marketing", "Finance", "Human Resource", "International Business", "Operation Management"],
+      higherStudies: ["MBA", "PGDM", "MSc Management", "LLB", "Entrepreneurship Programs"],
+      careers: ["Marketing Manager", "HR Manager", "Sales Manager", "Project Manager", "Entrepreneur / Startup Founder"]
+    },
+    bms: {
+      path: "After 10th --> Commerce --> BMS",
+      fields: ["Marketing", "Finance", "Human Resource", "International Business", "Operation Management"],
+      higherStudies: ["MBA", "PGDM", "MSc Management", "LLB", "Entrepreneurship Programs", "CFA"],
+      careers: ["Marketing Manager", "HR Manager", "Sales Manager", "Project Manager", "Entrepreneur / Startup Founder", "Strategy Analyst", "Corporate Executive"]
+    },
+    ca: {
+      path: "After 10th --> Commerce --> CA",
+      levels: ["CA Foundation", "CA Intermediate", "Articleship", "CA Final"],
+      careers: ["Chartered Accountant (Practice)", "Auditor", "Tax Consultant", "Financial Controller", "CFO", "Investment Banker", "Finance Manager", "Corporate Advisor"]
+    },
+    baf: {
+      path: "After 10th --> Commerce --> BAF",
+      focusAreas: ["Financial Accounting", "Cost Accounting", "Taxation", "Auditing", "Financial Management", "Investment Analysis"],
+      higherStudies: ["MBA (Finance)", "MCom", "CA", "CMA", "CFA", "MSc Finance", "PGDM in Finance"],
+      careers: ["Accountant", "Financial Analyst", "Auditor", "Tax Consultant", "Investment Analyst", "Risk Analyst", "Banking Officer", "Finance Executive"]
+    },
+    cs: {
+      path: "After 10th --> Commerce --> CS",
+      levels: ["CS Executive Entrance Test (CSEET)", "CS Executive Programme", "CS Professional Programme", "Practical Training / Internship"],
+      higherStudies: ["LLB (Corporate Law)", "MBA (Finance / HR / Business Law)", "MCom", "PhD in Commerce / Law", "International Corporate Governance Programs"],
+      careers: ["Company Secretary", "Compliance Officer", "Corporate Legal Advisor", "Governance Officer", "Corporate Consultant", "Secretarial Auditor", "Risk & Compliance Manager"]
+    }
+  },
+  Arts: {
+    ba: {
+      path: "After 10th --> Arts --> BA",
+      specializations: ["English","Psychology","Political Science","Sociology","History","Economics","Journalism & Mass Communication"],
+      higherStudies: ["MA","MBA","LLB","MSW","MPA","PhD"],
+      careers: ["Teacher / Professor","Civil Services","Journalist","Psychologist","Social Worker","Content Writer","Government Officer"]
+    },
+    bfa: {
+      path: "After 10th --> Arts --> BFA",
+      specializations: ["Painting","Applied Arts","Sculpture","Animation","Visual Communication"],
+      higherStudies: ["MFA","Animation & VFX Courses","Design Programs"],
+      careers: ["Graphic Designer","Animator","Art Director","Illustrator","Creative Director"]
+    },
+    bjmc: {
+      path: "After 10th --> Arts --> BJMC",
+      specializations: ["Journalism","Public Relations","Advertising","Digital Media"],
+      higherStudies: ["MJMC","MBA Media Management","Film Studies"],
+      careers: ["Journalist","News Reporter","Content Creator","PR Manager","Media Planner"]
+    },
+    llb: {
+      path: "After 10th --> Arts --> LLB",
+      higherStudies: ["LLM","PhD in Law","Judicial Services Preparation"],
+      careers: ["Advocate","Legal Advisor","Judge","Corporate Lawyer","Public Prosecutor"]
+    }
+  }
 };
 
 module.exports = educationData;

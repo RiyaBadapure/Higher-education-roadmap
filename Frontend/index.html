@@ -1,0 +1,1296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>PathForge — Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #03050a;
+      --surface: #0a0e18;
+      --surface2: #111827;
+      --surface3: #1a2235;
+      --border: rgba(255,255,255,0.07);
+      --accent: #00ffcc;
+      --accent2: #ff4d6d;
+      --accent3: #7c4dff;
+      --text: #f0f4ff;
+      --muted: #5a6a85;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Outfit', sans-serif;
+      min-height: 100vh;
+    }
+
+    /* NAV */
+    nav {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 1rem 3rem;
+      background: rgba(3,5,10,0.9);
+      border-bottom: 1px solid var(--border);
+      position: sticky; top: 0; z-index: 100;
+      backdrop-filter: blur(16px);
+    }
+
+    .logo { font-family: 'Bebas Neue', sans-serif; font-size: 1.7rem; letter-spacing: 0.1em; color: var(--text); text-decoration: none; }
+    .logo em { color: var(--accent); font-style: normal; }
+
+    .nav-right { display: flex; align-items: center; gap: 1rem; position: relative; }
+
+    .nav-avatar {
+      width: 38px; height: 38px; border-radius: 50%;
+      background: linear-gradient(135deg, #00ffcc, #7c4dff);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem; cursor: pointer;
+      border: 2px solid rgba(0,255,204,0.3);
+      transition: transform 0.2s;
+    }
+    .nav-avatar:hover { transform: scale(1.08); }
+
+    .profile-dropdown {
+      display: none; position: absolute; top: 48px; right: 0;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 14px; padding: 1.2rem; min-width: 230px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.5); z-index: 999;
+    }
+    .profile-dropdown.open { display: block; animation: fadeUp 0.2s ease; }
+
+    @keyframes fadeUp { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:translateY(0); } }
+
+    .drop-top {
+      display: flex; align-items: center; gap: 0.8rem;
+      padding-bottom: 0.9rem; margin-bottom: 0.9rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .drop-av {
+      width: 44px; height: 44px; border-radius: 50%;
+      background: linear-gradient(135deg, #00ffcc, #7c4dff);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.3rem; border: 2px solid rgba(0,255,204,0.3); flex-shrink: 0;
+    }
+
+    .drop-name { font-weight: 600; font-size: 0.9rem; }
+    .drop-edu { font-size: 0.74rem; color: var(--muted); margin-top: 0.1rem; }
+
+    .drop-row {
+      display: flex; justify-content: space-between; align-items: center;
+      font-size: 0.78rem; padding: 0.3rem 0;
+    }
+    .drop-key { color: var(--muted); }
+    .drop-val { color: var(--text); font-weight: 500; text-align: right; max-width: 140px; }
+
+    .drop-edit {
+      display: block; text-align: center; margin-top: 0.9rem;
+      background: rgba(0,255,204,0.07); color: var(--accent);
+      border: 1px solid rgba(0,255,204,0.2); border-radius: 8px;
+      padding: 0.45rem; font-size: 0.8rem; font-weight: 600;
+      text-decoration: none;
+    }
+    .drop-edit:hover { background: rgba(0,255,204,0.12); }
+
+    /* HERO INPUT SECTION */
+    .hero-section {
+      max-width: 720px; margin: 0 auto;
+      padding: 4rem 2rem 2rem;
+      text-align: center;
+    }
+
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      background: rgba(0,255,204,0.06); border: 1px solid rgba(0,255,204,0.15);
+      border-radius: 100px; padding: 0.35rem 1rem;
+      font-size: 0.75rem; color: var(--accent); font-weight: 500;
+      letter-spacing: 0.08em; text-transform: uppercase;
+      margin-bottom: 1.5rem;
+    }
+
+    .pulse { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); animation: blink 1.5s infinite; }
+    @keyframes blink { 0%,100%{opacity:1;} 50%{opacity:0.3;} }
+
+    .hero-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(2.5rem, 6vw, 4rem);
+      letter-spacing: 0.04em; line-height: 1;
+      margin-bottom: 0.8rem;
+    }
+
+    .hero-title em { color: var(--accent); font-style: normal; }
+
+    .hero-sub {
+      font-size: 0.95rem; color: var(--muted); line-height: 1.7;
+      font-weight: 300; margin-bottom: 2.5rem; max-width: 500px; margin-left: auto; margin-right: auto;
+    }
+
+    /* INPUT CARD */
+    .input-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 2rem;
+      position: relative; overflow: hidden;
+      text-align: left;
+    }
+
+    .input-card::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+      background: linear-gradient(90deg, transparent, var(--accent), transparent);
+      opacity: 0.5;
+    }
+
+    .input-row {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;
+    }
+
+    .ifield label {
+      display: block; font-size: 0.72rem; font-weight: 600;
+      letter-spacing: 0.08em; text-transform: uppercase;
+      color: var(--muted); margin-bottom: 0.4rem;
+    }
+
+    .ifield select, .ifield input {
+      width: 100%; background: var(--surface2);
+      border: 1px solid var(--border); border-radius: 10px;
+      padding: 0.8rem 1rem; color: var(--text);
+      font-family: 'Outfit', sans-serif; font-size: 0.95rem;
+      outline: none; transition: border-color 0.2s;
+    }
+    .ifield select { appearance: none; cursor: pointer; }
+    .ifield select option { background: #111827; }
+    .ifield select:focus, .ifield input:focus { border-color: rgba(0,255,204,0.4); }
+
+    .goal-input-wrap { position: relative; }
+
+    .goal-input-wrap input {
+      width: 100%; background: var(--surface2);
+      border: 1px solid var(--border); border-radius: 10px;
+      padding: 0.8rem 1rem; color: var(--text);
+      font-family: 'Outfit', sans-serif; font-size: 0.95rem;
+      outline: none; transition: border-color 0.2s;
+    }
+    .goal-input-wrap input:focus { border-color: rgba(0,255,204,0.4); }
+
+    .goal-input-wrap input::placeholder { color: var(--muted); }
+
+    /* EXAMPLE PILLS */
+    .example-pills {
+      display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 0.6rem;
+    }
+
+    .ex-pill {
+      font-size: 0.72rem; padding: 0.25rem 0.7rem;
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 100px; color: var(--muted); cursor: pointer;
+      transition: all 0.15s; font-family: 'Outfit', sans-serif;
+    }
+    .ex-pill:hover { border-color: rgba(0,255,204,0.3); color: var(--accent); }
+
+    .generate-btn {
+      width: 100%; margin-top: 1.2rem;
+      background: var(--accent); color: #000;
+      border: none; border-radius: 12px; padding: 1rem;
+      font-family: 'Outfit', sans-serif; font-size: 1rem; font-weight: 700;
+      cursor: pointer; transition: all 0.25s;
+      display: flex; align-items: center; justify-content: center; gap: 0.5rem;
+    }
+    .generate-btn:hover { transform: translateY(-2px); box-shadow: 0 0 25px rgba(0,255,204,0.3); }
+    .generate-btn:disabled { opacity: 0.6; cursor: default; transform: none; box-shadow: none; }
+
+    /* LOADING */
+    .loading-wrap {
+      display: none; text-align: center; padding: 4rem 2rem;
+      max-width: 720px; margin: 0 auto;
+    }
+    .loading-wrap.show { display: block; }
+
+    .ai-loader {
+      display: inline-flex; flex-direction: column; align-items: center; gap: 1.5rem;
+    }
+
+    .loader-ring {
+      width: 60px; height: 60px;
+      border: 3px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.9s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .loader-text {
+      font-size: 0.9rem; color: var(--muted); line-height: 1.6;
+    }
+
+    .loader-steps { display: flex; flex-direction: column; gap: 0.4rem; margin-top: 0.5rem; }
+
+    .loader-step {
+      font-size: 0.8rem; color: var(--muted);
+      display: flex; align-items: center; gap: 0.5rem;
+    }
+    .loader-step.active { color: var(--accent); }
+    .loader-step.done { color: #4ade80; }
+
+    /* RESULT */
+    .result-wrap {
+      display: none; max-width: 900px; margin: 0 auto; padding: 0 2rem 4rem;
+    }
+    .result-wrap.show { display: block; animation: fadeUp 0.4s ease; }
+
+    .result-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;
+    }
+
+    .result-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 1.6rem; letter-spacing: 0.04em;
+    }
+    .result-title span { color: var(--accent); }
+
+    .new-search-btn {
+      background: var(--surface2); color: var(--muted);
+      border: 1px solid var(--border); border-radius: 8px;
+      padding: 0.5rem 1rem; font-family: 'Outfit', sans-serif;
+      font-size: 0.82rem; font-weight: 500; cursor: pointer; transition: all 0.2s;
+    }
+    .new-search-btn:hover { color: var(--text); border-color: rgba(255,255,255,0.15); }
+
+    /* TABS */
+    .tabs {
+      display: flex; gap: 0.4rem; margin-bottom: 1.5rem;
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 12px; padding: 4px;
+    }
+
+    .tab {
+      flex: 1; padding: 0.6rem 0.5rem; border: none;
+      background: transparent; color: var(--muted);
+      font-family: 'Outfit', sans-serif; font-size: 0.82rem; font-weight: 500;
+      cursor: pointer; border-radius: 9px; transition: all 0.2s;
+      display: flex; align-items: center; justify-content: center; gap: 0.3rem;
+    }
+    .tab.active {
+      background: var(--surface); color: var(--text);
+      box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+    }
+
+    .tab-pane { display: none; }
+    .tab-pane.active { display: block; animation: fadeUp 0.3s ease; }
+
+    /* ROADMAP TIMELINE */
+    .timeline { position: relative; padding-left: 2rem; }
+    .timeline::before {
+      content: ''; position: absolute; left: 0.4rem; top: 0; bottom: 0;
+      width: 2px; background: linear-gradient(to bottom, var(--accent), var(--accent3), transparent);
+    }
+
+    .tl-item {
+      position: relative; margin-bottom: 2rem; padding-left: 1.2rem;
+      animation: fadeUp 0.4s ease both;
+    }
+
+    .tl-dot {
+      position: absolute; left: -1.55rem; top: 0.3rem;
+      width: 10px; height: 10px; border-radius: 50%;
+      background: var(--accent); border: 2px solid var(--bg);
+      box-shadow: 0 0 8px rgba(0,255,204,0.5);
+    }
+
+    .tl-phase {
+      font-size: 0.68rem; font-weight: 600; letter-spacing: 0.1em;
+      text-transform: uppercase; color: var(--accent); margin-bottom: 0.3rem;
+    }
+
+    .tl-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 1.15rem; letter-spacing: 0.03em; margin-bottom: 0.4rem;
+    }
+
+    .tl-desc { font-size: 0.88rem; color: var(--muted); line-height: 1.65; }
+
+    .tl-tags { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 0.6rem; }
+
+    .tag {
+      font-size: 0.72rem; padding: 0.22rem 0.6rem; border-radius: 4px; font-weight: 500;
+    }
+    .tag-c { background: rgba(0,255,204,0.1); color: var(--accent); }
+    .tag-p { background: rgba(124,77,255,0.1); color: #a78bfa; }
+    .tag-o { background: rgba(255,107,53,0.1); color: #ff8c5a; }
+
+    /* INFO CARDS GRID */
+    .info-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 1rem;
+    }
+
+    .info-card {
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 12px; padding: 1.2rem; transition: all 0.2s;
+    }
+    .info-card:hover { border-color: rgba(0,255,204,0.2); transform: translateY(-2px); }
+
+    .info-card-flag { font-size: 1.6rem; margin-bottom: 0.5rem; }
+    .info-card-name { font-family: 'Bebas Neue', sans-serif; font-size: 1rem; letter-spacing: 0.03em; margin-bottom: 0.2rem; }
+    .info-card-sub { font-size: 0.78rem; color: var(--muted); margin-bottom: 0.5rem; line-height: 1.4; }
+
+    /* JOB LIST */
+    .job-list { display: flex; flex-direction: column; gap: 0.7rem; }
+
+    .job-item {
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 10px; padding: 1rem 1.2rem;
+      display: flex; align-items: center; justify-content: space-between;
+      transition: all 0.2s;
+    }
+    .job-item:hover { border-color: rgba(0,255,204,0.2); }
+
+    .job-title { font-weight: 600; font-size: 0.9rem; margin-bottom: 0.2rem; }
+    .job-meta { font-size: 0.78rem; color: var(--muted); }
+    .job-pay { font-family: 'Bebas Neue', sans-serif; font-size: 1rem; letter-spacing: 0.03em; color: #4ade80; }
+
+    /* ERROR */
+    .error-box {
+      background: rgba(255,77,109,0.06); border: 1px solid rgba(255,77,109,0.2);
+      border-radius: 12px; padding: 1.5rem; text-align: center; color: var(--muted);
+    }
+
+    /* TOAST */
+    #toast {
+      position: fixed; bottom: 2rem; left: 50%; transform: translateX(-50%);
+      background: var(--surface2); border: 1px solid rgba(255,77,109,0.4);
+      border-radius: 10px; padding: 0.8rem 1.5rem;
+      font-size: 0.85rem; color: var(--text); z-index: 9999; display: none;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+    }
+
+    @media (max-width: 640px) {
+      nav { padding: 1rem 1.2rem; }
+      .hero-section { padding: 2rem 1.2rem 1.5rem; }
+      .input-card { padding: 1.2rem; }
+      .input-row { grid-template-columns: 1fr; }
+      .result-wrap { padding: 0 1.2rem 3rem; }
+      .tabs { flex-wrap: wrap; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="welcome.html" class="logo">Path<em>Forge</em></a>
+  <div class="nav-right">
+    <div class="nav-avatar" id="navAvatar" onclick="toggleDrop()">🎓</div>
+    <div class="profile-dropdown" id="profileDrop">
+      <div class="drop-top">
+        <div class="drop-av" id="dropAv">🎓</div>
+        <div>
+          <div class="drop-name" id="dropName">Student</div>
+          <div class="drop-edu" id="dropEdu">—</div>
+        </div>
+      </div>
+      <div class="drop-row"><span class="drop-key">📍 City</span><span class="drop-val" id="dropCity">—</span></div>
+      <div class="drop-row"><span class="drop-key">🎯 Goals</span><span class="drop-val" id="dropGoals">—</span></div>
+      <div class="drop-row"><span class="drop-key">💡 Interests</span><span class="drop-val" id="dropInterests">—</span></div>
+      <a href="profile.html" class="drop-edit">✏️ Edit Profile</a>
+    </div>
+  </div>
+</nav>
+
+<!-- HERO INPUT -->
+<div class="hero-section" id="heroSection">
+  <div class="hero-badge"><div class="pulse"></div> AI-Powered Roadmap Generator</div>
+  <h1 class="hero-title">WHAT'S YOUR<br><em>DESTINATION?</em></h1>
+  <p class="hero-sub">Tell us where you are and where you want to go — our AI will build your complete roadmap, find colleges, countries, and part-time jobs for you.</p>
+
+  <div class="input-card">
+    <div class="input-row">
+      <div class="ifield">
+        <label>Your Current Level *</label>
+        <select id="currentLevel">
+          <option value="">Select your level</option>
+          <option value="10th Grade student">10th Grade</option>
+          <option value="11th / 12th Grade student">11th / 12th Grade</option>
+          <option value="Diploma student">Diploma Student</option>
+          <option value="Undergraduate engineering student">Undergraduate — Engineering</option>
+          <option value="Undergraduate science student">Undergraduate — Science</option>
+          <option value="Undergraduate commerce student">Undergraduate — Commerce</option>
+          <option value="Undergraduate arts student">Undergraduate — Arts</option>
+          <option value="Postgraduate student">Postgraduate Student</option>
+          <option value="Working professional">Working Professional</option>
+          <option value="Gap year student">Gap Year</option>
+        </select>
+      </div>
+
+      <div class="ifield">
+        <label>Your Dream Career Goal *</label>
+        <div class="goal-input-wrap">
+          <input type="text" id="careerGoal" placeholder="e.g. IAS Officer, Doctor, Game Developer..."/>
+        </div>
+        <div class="example-pills">
+          <span class="ex-pill" onclick="setGoal('IAS Officer')">🏛 IAS Officer</span>
+          <span class="ex-pill" onclick="setGoal('Software Engineer at Google')">💻 Google SWE</span>
+          <span class="ex-pill" onclick="setGoal('Doctor / MBBS')">⚕️ Doctor</span>
+          <span class="ex-pill" onclick="setGoal('Data Scientist')">📊 Data Scientist</span>
+          <span class="ex-pill" onclick="setGoal('Entrepreneur / Startup Founder')">🚀 Entrepreneur</span>
+          <span class="ex-pill" onclick="setGoal('Game Developer')">🎮 Game Dev</span>
+          <span class="ex-pill" onclick="setGoal('Investment Banker')">💰 Banker</span>
+          <span class="ex-pill" onclick="setGoal('Content Creator / YouTuber')">🎬 Creator</span>
+        </div>
+      </div>
+    </div>
+
+    <button class="generate-btn" id="generateBtn" onclick="generateRoadmap()">
+      ⚡ Generate My Roadmap
+    </button>
+  </div>
+</div>
+
+<!-- LOADING -->
+<div class="loading-wrap" id="loadingWrap">
+  <div class="ai-loader">
+    <div class="loader-ring"></div>
+    <div class="loader-text">
+      <strong style="color:var(--text); font-size:1rem;">Building your roadmap...</strong>
+      <div class="loader-steps">
+        <div class="loader-step active" id="ls1">⚡ Analysing your goal</div>
+        <div class="loader-step" id="ls2">🗺 Mapping career phases</div>
+        <div class="loader-step" id="ls3">🏫 Finding top colleges</div>
+        <div class="loader-step" id="ls4">🌍 Checking best countries</div>
+        <div class="loader-step" id="ls5">💼 Matching part-time jobs</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- RESULTS -->
+<div class="result-wrap" id="resultWrap">
+  <div class="result-header">
+    <div>
+      <div style="font-size:0.75rem; color:var(--muted); margin-bottom:0.3rem; text-transform:uppercase; letter-spacing:0.08em;">Your Personalized Roadmap</div>
+      <div class="result-title">PATH TO <span id="resultGoalTitle">YOUR GOAL</span></div>
+    </div>
+    <button class="new-search-btn" onclick="resetSearch()">← New Search</button>
+  </div>
+
+  <!-- TABS -->
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab(this,'tabRoadmap')">🗺 Roadmap</button>
+    <button class="tab" onclick="switchTab(this,'tabColleges')">🏫 Colleges</button>
+    <button class="tab" onclick="switchTab(this,'tabCountries')">🌍 Countries</button>
+    <button class="tab" onclick="switchTab(this,'tabJobs')">💼 Part-time Jobs</button>
+  </div>
+
+  <div class="tab-pane active" id="tabRoadmap"><div class="timeline" id="roadmapContent"></div></div>
+  <div class="tab-pane" id="tabColleges"><div class="info-grid" id="collegesContent"></div></div>
+  <div class="tab-pane" id="tabCountries"><div class="info-grid" id="countriesContent"></div></div>
+  <div class="tab-pane" id="tabJobs"><div class="job-list" id="jobsContent"></div></div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+  // ── PROFILE LOAD ──
+  var pEmoji     = localStorage.getItem('pf_emoji')     || 'S';
+  var pName      = localStorage.getItem('pf_name')      || 'Student';
+  var pEdu       = localStorage.getItem('pf_edu')       || '-';
+  var pCity      = localStorage.getItem('pf_city')      || '-';
+  var pGoals     = localStorage.getItem('pf_goals')     || '-';
+  var pInterests = localStorage.getItem('pf_interests') || '-';
+
+  document.getElementById('navAvatar').textContent     = pEmoji;
+  document.getElementById('dropAv').textContent        = pEmoji;
+  document.getElementById('dropName').textContent      = pName;
+  document.getElementById('dropEdu').textContent       = pEdu;
+  document.getElementById('dropCity').textContent      = pCity;
+  document.getElementById('dropGoals').textContent     = pGoals;
+  document.getElementById('dropInterests').textContent = pInterests;
+
+  function toggleDrop() {
+    document.getElementById('profileDrop').classList.toggle('open');
+  }
+  document.addEventListener('click', function(e) {
+    var av = document.getElementById('navAvatar');
+    var dr = document.getElementById('profileDrop');
+    if (!av.contains(e.target) && !dr.contains(e.target)) dr.classList.remove('open');
+  });
+
+  function setGoal(goal) {
+    document.getElementById('careerGoal').value = goal;
+  }
+
+  function showToast(msg) {
+    var t = document.getElementById('toast');
+    t.textContent = msg; t.style.display = 'block';
+    setTimeout(function() { t.style.display = 'none'; }, 3000);
+  }
+
+  function switchTab(btn, paneId) {
+    document.querySelectorAll('.tab').forEach(function(t) { t.classList.remove('active'); });
+    document.querySelectorAll('.tab-pane').forEach(function(p) { p.classList.remove('active'); });
+    btn.classList.add('active');
+    document.getElementById(paneId).classList.add('active');
+  }
+
+  function resetSearch() {
+    document.getElementById('heroSection').style.display = 'block';
+    document.getElementById('resultWrap').classList.remove('show');
+    document.getElementById('careerGoal').value = '';
+    window.scrollTo(0, 0);
+  }
+
+  var loaderInterval = null;
+  function animateLoader() {
+    var steps = ['ls1','ls2','ls3','ls4','ls5'];
+    var idx = 0;
+    steps.forEach(function(id) {
+      var el = document.getElementById(id);
+      el.classList.remove('active','done');
+    });
+    document.getElementById('ls1').classList.add('active');
+    loaderInterval = setInterval(function() {
+      if (idx < steps.length) {
+        document.getElementById(steps[idx]).classList.remove('active');
+        document.getElementById(steps[idx]).classList.add('done');
+        idx++;
+        if (idx < steps.length) document.getElementById(steps[idx]).classList.add('active');
+      }
+    }, 800);
+  }
+
+  // ════════════════════════════════════════════
+  //  CAREER CATEGORY ENGINE
+  //  Detects any career and assigns it a category
+  //  Each category has full 10th→12th→Exams→Courses→University→Career roadmap
+  // ════════════════════════════════════════════
+
+  var careerCategories = {
+
+    'engineering': {
+      keywords: ['engineer','software','developer','coder','programmer','web developer','app developer','mechanical','civil','electrical','electronics','chemical','aerospace','robotics','hardware','firmware','devops','sde','system design','embedded','iot','chip','vlsi'],
+      icon: 'ENGINEERING & TECHNOLOGY',
+      roadmap: [
+        {
+          phase: 'Phase 1 — 10th Grade',
+          title: 'Build a Strong Science & Math Foundation',
+          desc: 'Focus heavily on Mathematics, Science (Physics & Chemistry), and Computer Science in 10th. Aim for 85%+ in boards. Start exploring basic programming (Scratch, Python basics) on your own.',
+          tags: ['10th Boards','Maths & Science','CBSE / ICSE','Basic Python']
+        },
+        {
+          phase: 'Phase 2 — 11th & 12th (PCM)',
+          title: 'Choose Science Stream with PCM',
+          desc: 'Take Physics, Chemistry, Mathematics (PCM) in 11th. This is mandatory for engineering. Optionally add Computer Science as 5th subject. Begin JEE / CET coaching. Target 80%+ in 12th boards.',
+          tags: ['PCM Stream','12th Boards','JEE Coaching','Computer Science (optional)']
+        },
+        {
+          phase: 'Phase 3 — Entrance Exams',
+          title: 'Crack Engineering Entrance Exams',
+          desc: 'Appear for JEE Mains (for NITs, IIITs) and JEE Advanced (for IITs). Alternatively MHT-CET, KCET, WBJEE, BITSAT for state/private colleges. SAT + IELTS/TOEFL if targeting abroad. Prepare for at least 1 year seriously.',
+          tags: ['JEE Mains','JEE Advanced','BITSAT','MHT-CET','SAT (Abroad)']
+        },
+        {
+          phase: 'Phase 4 — B.Tech Degree (4 Years)',
+          title: 'B.Tech in Your Chosen Engineering Branch',
+          desc: 'Complete B.Tech in Computer Science, Mechanical, Civil, or your chosen branch. Build projects, do 2+ internships, contribute to GitHub, participate in hackathons. Your CGPA + projects both matter for placements.',
+          tags: ['B.Tech 4 Years','Internships','GitHub Projects','Hackathons','CGPA 7+']
+        },
+        {
+          phase: 'Phase 5 — Career',
+          title: 'Land a Job or Pursue M.Tech / MS Abroad',
+          desc: 'Apply via campus placements targeting product-based companies. Optionally pursue M.Tech via GATE exam or MS abroad via GRE + IELTS. Engineering is one of the highest-paying and most globally in-demand careers.',
+          tags: ['Campus Placement','GATE (M.Tech)','GRE + IELTS (MS Abroad)','Rs.6-60 LPA']
+        }
+      ],
+      colleges: [
+        { flag: 'IIT', name: 'IIT Bombay / Delhi / Madras', sub: 'Top Government — JEE Advanced required', tags: ['JEE Advanced', 'Rs.40-80 LPA'] },
+        { flag: 'NIT', name: 'NIT Trichy / Warangal / Surathkal', sub: 'Top NITs — JEE Mains required', tags: ['JEE Mains', 'Rs.10-35 LPA'] },
+        { flag: 'PVT', name: 'BITS Pilani / VIT / Manipal', sub: 'Top Private — BITSAT / VITEEE', tags: ['Private', 'Good Placements'] },
+        { flag: 'GOV', name: 'COEP Pune / DTU Delhi / VJTI Mumbai', sub: 'State Government — State CET required', tags: ['MHT-CET / State CET', 'Affordable'] }
+      ],
+      countries: [
+        { flag: 'IN', name: 'India', sub: 'IITs and NITs — world-class engineering at low cost', tags: ['Affordable', 'JEE Required'] },
+        { flag: 'US', name: 'USA', sub: 'MIT, Stanford, CMU, Caltech — FAANG jobs post MS', tags: ['GRE + IELTS', '$100-200K Jobs'] },
+        { flag: 'DE', name: 'Germany', sub: 'TU Munich, RWTH Aachen — free tuition, strong industry', tags: ['Free Tuition', 'PR Friendly'] },
+        { flag: 'CA', name: 'Canada', sub: 'UofT, UBC, Waterloo — AI & tech hub, easy PR pathway', tags: ['PR Easy', 'PGWP'] }
+      ],
+      jobs: [
+        { title: 'Freelance Web Developer', meta: 'Remote, Flexible hours, HTML/CSS/JS needed', pay: 'Rs.15k-50k/mo' },
+        { title: 'Online Coding Tutor', meta: 'Remote, Evenings, Strong DSA knowledge', pay: 'Rs.10k-30k/mo' },
+        { title: 'UI/UX Design Intern', meta: 'Remote startups, 20 hrs/week, Figma skills', pay: 'Rs.8k-20k/mo' },
+        { title: 'Tech Content Writer', meta: 'Remote, Flexible, Writing + coding basics', pay: 'Rs.8k-20k/mo' },
+        { title: 'Campus Tech Support', meta: 'On-campus, Part-time, Basic computer skills', pay: 'Rs.5k-10k/mo' }
+      ]
+    },
+
+    'medical': {
+      keywords: ['doctor','mbbs','physician','surgeon','dentist','dental','nurse','nursing','pharmacist','pharmacy','physiotherapy','physiotherapist','ayurveda','homeopathy','veterinary','vet','radiologist','pathologist','cardiologist','dermatologist','pediatrician','psychiatrist','neurologist','anesthesiologist','medical'],
+      icon: 'MEDICAL & HEALTHCARE',
+      roadmap: [
+        {
+          phase: 'Phase 1 — 10th Grade',
+          title: 'Score Well in Science & Biology',
+          desc: 'Focus on Science (especially Biology) and Mathematics in 10th. Aim for 85%+ in boards. Read NCERT Science thoroughly. Understand basic human biology and chemistry concepts well.',
+          tags: ['10th Boards', 'Science & Biology', 'NCERT Focus', '85%+ Target']
+        },
+        {
+          phase: 'Phase 2 — 11th & 12th (PCB)',
+          title: 'Choose Science Stream with PCB',
+          desc: 'Take Physics, Chemistry, Biology (PCB) in 11th — this is mandatory for medical. Optionally add Mathematics. Start NEET preparation alongside boards. Study NCERT Biology line-by-line. Target 85%+ in 12th.',
+          tags: ['PCB Stream', '12th Boards', 'NEET Coaching', 'NCERT Biology Line-by-Line']
+        },
+        {
+          phase: 'Phase 3 — Entrance Exams',
+          title: 'Crack NEET-UG for MBBS Admission',
+          desc: 'NEET-UG is the single national entrance for all medical colleges in India. Score 600+ for government colleges, 500+ for private. Solve 10+ years of papers. Join Allen, Aakash, or self-study. You can attempt NEET multiple times.',
+          tags: ['NEET-UG', '600+ for Govt', 'Allen / Aakash', 'Multiple Attempts Allowed']
+        },
+        {
+          phase: 'Phase 4 — MBBS / BDS / B.Sc Nursing (3-5.5 Years)',
+          title: 'Complete Your Medical Degree',
+          desc: 'MBBS is 5.5 years (including 1-year internship). BDS (Dentistry) is 5 years. B.Sc Nursing is 4 years. Clinical rotations in final years give hands-on hospital experience. Complete your compulsory internship after degree.',
+          tags: ['MBBS 5.5 Yrs', 'Clinical Rotations', 'Hospital Internship', 'MCI/NMC Registration']
+        },
+        {
+          phase: 'Phase 5 — Specialisation & Career',
+          title: 'NEET-PG for Specialisation or Start Practice',
+          desc: 'After MBBS, appear for NEET-PG to pursue MD/MS specialisation (3 years). Specialisations like Cardiology, Neurology, Surgery significantly boost earnings. Or start general practice in a clinic / hospital directly.',
+          tags: ['NEET-PG', 'MD / MS', 'Own Clinic', 'Rs.1.5L-10L/mo']
+        }
+      ],
+      colleges: [
+        { flag: 'GOV', name: 'AIIMS Delhi / AIIMS Rishikesh', sub: 'Top Government — NEET 700+ required', tags: ['NEET 700+', 'Free / Subsidised'] },
+        { flag: 'GOV', name: 'JIPMER Puducherry', sub: 'Central Government — NEET required', tags: ['NEET Required', 'Free Education'] },
+        { flag: 'PVT', name: 'Kasturba Medical College, Manipal', sub: 'Top Private — NEET 500+ required', tags: ['NEET 500+', 'High Fees'] },
+        { flag: 'PVT', name: 'CMC Vellore / St. Johns Bangalore', sub: 'Prestigious Private — NEET + Interview', tags: ['NEET + Interview', 'Research Focus'] }
+      ],
+      countries: [
+        { flag: 'IN', name: 'India', sub: 'AIIMS, JIPMER — best value MBBS, NMC-recognised worldwide', tags: ['Affordable', 'NEET Required'] },
+        { flag: 'US', name: 'USA', sub: 'Johns Hopkins, Harvard — USMLE exam pathway for Indian graduates', tags: ['USMLE', '$200-400K Salary'] },
+        { flag: 'UK', name: 'UK', sub: 'Oxford, Imperial, UCL — PLAB exam for Indian MBBS doctors', tags: ['PLAB', 'NHS Jobs'] },
+        { flag: 'RU', name: 'Russia / Kazakhstan', sub: 'NMC-recognised budget MBBS — popular affordable option', tags: ['Budget MBBS', 'Rs.20-35L Total'] }
+      ],
+      jobs: [
+        { title: 'Hospital Ward / Lab Assistant', meta: 'On-site, Weekends, Medical student preferred', pay: 'Rs.8k-15k/mo' },
+        { title: 'Biology / Chemistry Tutor', meta: 'Remote or On-site, Evenings', pay: 'Rs.10k-25k/mo' },
+        { title: 'Health Content Writer', meta: 'Remote, Flexible, Medical knowledge needed', pay: 'Rs.8k-20k/mo' },
+        { title: 'Medical Transcriptionist', meta: 'Remote, Flexible, Typing + medical terms', pay: 'Rs.8k-18k/mo' },
+        { title: 'Pharmacy / Clinic Assistant', meta: 'On-site, Part-time, Local pharmacy', pay: 'Rs.6k-12k/mo' }
+      ]
+    },
+
+    'government': {
+      keywords: ['ias','ips','ifs','upsc','civil service','collector','bureaucrat','government officer','police','army','navy','air force','military','defence','nda','cds','ssc','bank','banking','psc','state service','forest officer','irs','revenue','income tax'],
+      icon: 'GOVERNMENT & PUBLIC SERVICE',
+      roadmap: [
+        {
+          phase: 'Phase 1 — 10th Grade',
+          title: 'Build Academic Foundation & General Awareness',
+          desc: 'Score 85%+ in 10th boards. Start reading a newspaper daily (The Hindu or Indian Express). Develop habit of following current affairs, national events, and government policies from early on.',
+          tags: ['10th Boards', 'Newspaper Habit', 'Current Affairs', 'General Knowledge']
+        },
+        {
+          phase: 'Phase 2 — 11th & 12th',
+          title: 'Any Stream — But Strengthen Generals',
+          desc: 'Any stream (PCM, PCB, or Commerce/Arts) is accepted for UPSC and most government exams. Arts/Humanities is especially helpful for UPSC preparation. Score 60%+ in 12th as minimum eligibility.',
+          tags: ['Any Stream', '12th Boards', 'Arts/Humanities Preferred', '60%+ Required']
+        },
+        {
+          phase: 'Phase 3 — Graduation + Entrance Exams',
+          title: 'Complete Any Graduation + Start Exam Prep',
+          desc: 'Any bachelor degree is required for UPSC. For banking — appear for IBPS/SBI PO after graduation. For SSC CGL — graduation is mandatory. For NDA (Military) — appear after 12th itself. Start preparation 1-2 years before exam.',
+          tags: ['Any Graduation', 'UPSC CSE', 'IBPS/SBI PO (Banking)', 'NDA/CDS (Military)', 'SSC CGL']
+        },
+        {
+          phase: 'Phase 4 — Main Exam + Interview',
+          title: 'Clear Mains Exam & Personality Test',
+          desc: 'Most government exams have 3 stages — Prelims, Mains, and Interview. Mains is descriptive and tests depth of knowledge. Interview tests your personality, awareness, and communication. Answer writing practice is the key to cracking mains.',
+          tags: ['Prelims', 'Mains Exam', 'Personality Interview', 'Answer Writing']
+        },
+        {
+          phase: 'Phase 5 — Training & Career',
+          title: 'Join Training Academy & Start Your Service',
+          desc: 'After selection, you join a national training academy (LBSNAA for IAS, SVP NPA for IPS, NDA for Military). You are then posted to a district or department. Government careers offer job security, pension, power, and respect.',
+          tags: ['LBSNAA / NPA / NDA', 'District Posting', 'Job Security', 'Pension & Perks']
+        }
+      ],
+      colleges: [
+        { flag: 'UNI', name: 'Delhi University (DU)', sub: 'Delhi — BA/B.Com/B.Sc, top UPSC alumni base', tags: ['Any Stream', 'UPSC Friendly'] },
+        { flag: 'UNI', name: 'Jawaharlal Nehru University (JNU)', sub: 'Delhi — Political Science, History, IR', tags: ['Arts/Social Science', 'Research'] },
+        { flag: 'UNI', name: 'Allahabad University', sub: 'UP — History, Geography, Political Science', tags: ['UPSC Belt', 'Affordable'] },
+        { flag: 'MIL', name: 'NDA (National Defence Academy)', sub: 'Pune — For Army/Navy/Air Force after 12th', tags: ['NDA Exam', 'After 12th'] }
+      ],
+      countries: [
+        { flag: 'IN', name: 'India Only', sub: 'UPSC, SSC, IBPS — all Indian government exams, serve the nation', tags: ['India Only', 'No Abroad Option'] }
+      ],
+      jobs: [
+        { title: 'Current Affairs Content Writer', meta: 'Remote, 10 hrs/week, Writing skills needed', pay: 'Rs.8k-18k/mo' },
+        { title: 'Online Tutor — History / Polity / GK', meta: 'Remote, Evenings, Graduation required', pay: 'Rs.10k-25k/mo' },
+        { title: 'UPSC / SSC Coaching Assistant', meta: 'On-site, Part-time, Knowledge of syllabus', pay: 'Rs.8k-15k/mo' },
+        { title: 'Research Assistant — NGO or Think Tank', meta: 'Remote/Hybrid, 15 hrs/week, Good writing', pay: 'Rs.10k-20k/mo' },
+        { title: 'Freelance Article Writer', meta: 'Remote, Flexible, Current affairs knowledge', pay: 'Rs.5k-15k/mo' }
+      ]
+    },
+
+    'law': {
+      keywords: ['lawyer','advocate','judge','legal','law','attorney','barrister','solicitor','corporate law','criminal law','family law','llb','judiciary','court','legal advisor','intellectual property','patent','human rights lawyer','public prosecutor'],
+      icon: 'LAW & LEGAL SERVICES',
+      roadmap: [
+        {
+          phase: 'Phase 1 — 10th Grade',
+          title: 'Build Reading, Writing & Logical Thinking',
+          desc: 'Focus on English, Social Science, and any other language. Law requires exceptional reading comprehension, writing, and logical reasoning. Aim for 80%+ in 10th. Start reading newspapers and understanding current legal news.',
+          tags: ['10th Boards', 'Strong English', 'Reading Habit', 'Logical Reasoning']
+        },
+        {
+          phase: 'Phase 2 — 11th & 12th',
+          title: 'Any Stream — Arts is Most Beneficial',
+          desc: 'Any stream is accepted for law colleges. Arts/Humanities with History, Political Science, and Economics is most helpful. Score 45%+ (50% for reserved categories) in 12th which is the minimum for most law colleges.',
+          tags: ['Any Stream', 'Arts Preferred', 'History / Pol. Science', '45%+ in 12th']
+        },
+        {
+          phase: 'Phase 3 — Entrance Exams',
+          title: 'Crack CLAT or Law Entrance Exams',
+          desc: 'CLAT (Common Law Admission Test) is the gateway to top National Law Universities (NLUs). AILET for NLU Delhi, LSAT for private colleges. You can also do 3-year LLB after any graduation. Prepare English, GK, Legal Reasoning, Logical Reasoning, and Maths sections.',
+          tags: ['CLAT', 'AILET (NLU Delhi)', 'LSAT India', '3-Year LLB (Post Graduation)']
+        },
+        {
+          phase: 'Phase 4 — BA LLB / LLB Degree (5 or 3 Years)',
+          title: 'Complete Your Law Degree',
+          desc: 'Integrated BA LLB is a 5-year program after 12th. 3-year LLB is done after any graduation. Study Constitutional Law, Criminal Law, Contract Law, Corporate Law, IPR, and more. Do internships at law firms or courts every summer.',
+          tags: ['BA LLB 5 Years', 'LLB 3 Years', 'Court Internships', 'Law Firm Internship', 'Moot Courts']
+        },
+        {
+          phase: 'Phase 5 — Bar Council & Career',
+          title: 'Enroll with Bar Council & Start Practice',
+          desc: 'After LLB, you must enroll with the Bar Council of India or your State Bar Council to practice. You can join a law firm, become a corporate lawyer, appear in courts as an advocate, or pursue Judiciary exams to become a judge.',
+          tags: ['Bar Council Enrollment', 'Corporate Law Firm', 'Advocate / Court', 'Judiciary Exam', 'LLM for Specialisation']
+        }
+      ],
+      colleges: [
+        { flag: 'NLU', name: 'NLSIU Bangalore / NLU Delhi', sub: 'Top National Law Universities — CLAT / AILET', tags: ['CLAT', 'Top Ranked'] },
+        { flag: 'NLU', name: 'NALSAR Hyderabad / NLU Jodhpur', sub: 'Premier NLUs — CLAT required', tags: ['CLAT', 'Good Placements'] },
+        { flag: 'UNI', name: 'Faculty of Law, DU (Delhi University)', sub: 'Delhi — DU LLB Entrance + Affordable', tags: ['DU Entrance', 'Affordable'] },
+        { flag: 'PVT', name: 'Symbiosis Law School, Pune', sub: 'Top Private — SLAT entrance required', tags: ['SLAT Entrance', 'Private'] }
+      ],
+      countries: [
+        { flag: 'IN', name: 'India', sub: 'NLUs, DU Law — strong judiciary and corporate law ecosystem', tags: ['Affordable', 'CLAT Required'] },
+        { flag: 'UK', name: 'UK', sub: 'Oxford, LSE, UCL — common law system, barrister training', tags: ['GDL / LLM', 'Barrister Path'] },
+        { flag: 'US', name: 'USA', sub: 'Harvard Law, Yale — JD degree, highest paying law jobs globally', tags: ['LSAT', '$160-300K Jobs'] },
+        { flag: 'SG', name: 'Singapore / Australia', sub: 'NUS, ANU — strong common law, Asia-Pacific legal hub', tags: ['Ranked Programs', 'Asia Legal Hub'] }
+      ],
+      jobs: [
+        { title: 'Legal Research Intern', meta: 'Law firm or NGO, Part-time, Law student required', pay: 'Rs.5k-15k/mo' },
+        { title: 'Content Writer — Legal Topics', meta: 'Remote, Flexible, Legal knowledge needed', pay: 'Rs.8k-20k/mo' },
+        { title: 'Paralegal Assistant', meta: 'On-site, Part-time, Law college student', pay: 'Rs.8k-15k/mo' },
+        { title: 'Online Tutor — Civics / History', meta: 'Remote, Evenings', pay: 'Rs.8k-20k/mo' },
+        { title: 'Court / Legal Transcription', meta: 'Remote or On-site, Flexible hours', pay: 'Rs.6k-15k/mo' }
+      ]
+    },
+
+    'finance': {
+      keywords: ['ca','chartered accountant','finance','investment banker','investment banking','banker','stock market','trader','portfolio manager','financial analyst','actuary','cfa','cpa','tax','audit','accounting','accountant','wealth manager','insurance','economics','economist'],
+      icon: 'FINANCE, BANKING & ACCOUNTING',
+      roadmap: [
+        {
+          phase: 'Phase 1 — 10th Grade',
+          title: 'Build Strong Maths & Analytical Skills',
+          desc: 'Score well in Mathematics in 10th — this is absolutely critical for any finance career. Develop logical reasoning and basic accounting concepts. Aim for 85%+ in boards. Start reading about stock markets and financial news.',
+          tags: ['10th Boards', 'Strong Maths', 'Logical Reasoning', 'Financial Awareness']
+        },
+        {
+          phase: 'Phase 2 — 11th & 12th (Commerce)',
+          title: 'Choose Commerce Stream with Maths',
+          desc: 'Take Commerce with Accountancy, Business Studies, Economics, and Mathematics in 11th. This is the ideal base for a finance career. Score 75%+ in 12th boards. Consider registering for CA Foundation after 12th itself.',
+          tags: ['Commerce Stream', 'Accountancy', 'Economics + Maths', 'CA Foundation Registration']
+        },
+        {
+          phase: 'Phase 3 — Entrance Exams & Courses',
+          title: 'CA Foundation / B.Com / BBA Entrance',
+          desc: 'For CA: Appear for CA Foundation after 12th, then CA Inter, then CA Final — this is a 4-5 year process with ICAI. For B.Com / BBA: Apply to DU, Christ, Symbiosis using 12th marks or entrance tests. For CFA: Start Level 1 in final year of graduation.',
+          tags: ['CA Foundation (ICAI)', 'B.Com / BBA', 'DU / Christ Entrance', 'CFA Level 1 (Post Grad)']
+        },
+        {
+          phase: 'Phase 4 — Degree + Professional Certification',
+          title: 'Complete Degree & Get Certified',
+          desc: 'Complete B.Com/BBA/Economics degree (3 years). Simultaneously pursue CA, CFA, or CS (Company Secretary) certification. Do internships at CA firms, banks, or NBFCs. Build Excel, financial modelling, and data analysis skills.',
+          tags: ['B.Com / BBA 3 Yrs', 'CA / CFA / CS', 'Financial Modelling', 'Bank Internship']
+        },
+        {
+          phase: 'Phase 5 — Career',
+          title: 'Investment Banking / CA / Analyst Role',
+          desc: 'CA earns Rs.7-25 LPA starting. Investment Bankers at top firms earn Rs.20-80 LPA. CFA charterholders are globally recognised. MBA Finance from IIM can fast-track to Rs.25-60 LPA packages. Finance is one of the highest-paid fields globally.',
+          tags: ['CA Rs.7-25 LPA', 'Investment Banker', 'IIM MBA Finance', 'CFA Charterholder']
+        }
+      ],
+      colleges: [
+        { flag: 'IIM', name: 'IIM Ahmedabad / Calcutta / Bangalore', sub: 'Top MBA Finance — CAT exam required', tags: ['CAT 99%ile', 'Rs.30-60 LPA'] },
+        { flag: 'UNI', name: 'SRCC Delhi / LSR Delhi (B.Com)', sub: 'Top B.Com colleges — DU Cutoff 97%+', tags: ['DU Cutoff', 'Top Finance Alumni'] },
+        { flag: 'UNI', name: 'Christ University / Symbiosis Pune', sub: 'Top Private — B.Com / BBA / MBA Finance', tags: ['Entrance Exam', 'Private'] },
+        { flag: 'ICAI', name: 'ICAI (CA Institute)', sub: 'All India — CA Foundation after 12th, No college needed', tags: ['12th Boards', 'Self Study + Articles'] }
+      ],
+      countries: [
+        { flag: 'IN', name: 'India', sub: 'CA (ICAI), IIM MBA Finance — globally recognised and highly paid', tags: ['Affordable', 'CA / IIM'] },
+        { flag: 'US', name: 'USA', sub: 'Wharton, Columbia, Harvard Business — Wall Street investment banking', tags: ['GMAT + IELTS', '$150-300K'] },
+        { flag: 'UK', name: 'UK', sub: 'LSE, Oxford, Imperial — London financial hub, ACCA / CFA pathway', tags: ['ACCA', 'London Finance Hub'] },
+        { flag: 'SG', name: 'Singapore / Hong Kong', sub: 'Asia financial centres — NUS, HKU for finance programs', tags: ['Asia Finance Hub', 'Strong ROI'] }
+      ],
+      jobs: [
+        { title: 'Finance Intern at CA Firm', meta: 'On-site, Part-time, Commerce student required', pay: 'Rs.5k-12k/mo' },
+        { title: 'Stock Market Research Analyst', meta: 'Remote, Flexible, Finance knowledge needed', pay: 'Rs.8k-20k/mo' },
+        { title: 'Accounts / Tally Assistant', meta: 'On-site, Part-time, Tally software skills', pay: 'Rs.8k-15k/mo' },
+        { title: 'Finance / Accounts Tutor', meta: 'Remote, Evenings, B.Com or CA student', pay: 'Rs.10k-25k/mo' },
+        { title: 'Tax Filing Assistant', meta: 'Remote, Seasonal, Basic accounting knowledge', pay: 'Rs.8k-20k/mo' }
+      ]
+    },
+
+    'design': {
+      keywords: ['designer','graphic designer','ui designer','ux designer','ui/ux','product designer','interior designer','fashion designer','architect','architecture','animation','animator','game designer','game developer','visual artist','illustrator','motion designer','industrial design','jewellery design'],
+      icon: 'DESIGN, ARCHITECTURE & ARTS',
+      roadmap: [
+        {
+          phase: 'Phase 1 — 10th Grade',
+          title: 'Develop Creative & Visual Skills',
+          desc: 'Score well in 10th boards. Focus on Art, Mathematics (for architecture), and Computer Science. Start building your creative portfolio — sketching, digital art, photography, or UI mockups. These early projects matter for design college applications.',
+          tags: ['10th Boards', 'Art & Drawing', 'Start Portfolio Early', 'Computer Basics']
+        },
+        {
+          phase: 'Phase 2 — 11th & 12th',
+          title: 'Choose Relevant Stream',
+          desc: 'For Architecture: PCM is mandatory. For Design / Fashion / Animation: Any stream works — Arts or Science both accepted. Score 50%+ in 12th. Learn Photoshop, Illustrator, Figma, or Sketch during this time through online tutorials.',
+          tags: ['PCM for Architecture', 'Any Stream for Design', 'Photoshop / Figma', '50%+ in 12th']
+        },
+        {
+          phase: 'Phase 3 — Entrance Exams',
+          title: 'Crack Design / Architecture Entrances',
+          desc: 'For Architecture: Appear for NATA (National Aptitude Test in Architecture) and JEE Mains Paper 2. For Design: NID DAT (National Institute of Design), NIFT entrance, UCEED (IIT Design). For Animation: DigiPen, Arena, or DSK Supinfocom direct admission with portfolio.',
+          tags: ['NATA (Architecture)', 'NIFT Entrance (Fashion)', 'NID DAT / UCEED (Design)', 'Portfolio Required']
+        },
+        {
+          phase: 'Phase 4 — B.Des / B.Arch / BFA Degree',
+          title: 'Complete Your Creative Degree',
+          desc: 'B.Arch is 5 years, B.Des is 4 years, BFA is 4 years. Build a strong portfolio throughout your degree. Participate in design competitions, freelance real projects for clients, and intern at design agencies or architecture firms every year.',
+          tags: ['B.Arch 5 Yrs', 'B.Des / BFA 4 Yrs', 'Design Competitions', 'Freelance Projects', 'Agency Internships']
+        },
+        {
+          phase: 'Phase 5 — Career',
+          title: 'Freelance, Join Agency, or Start Studio',
+          desc: 'Junior Designers earn Rs.4-10 LPA. Senior UI/UX Designers at top tech companies earn Rs.20-50 LPA. Architects earn Rs.4-15 LPA starting, more with own firm. Fashion Designers at brands earn Rs.5-25 LPA. Freelancing can earn Rs.50k-5L/month for skilled designers.',
+          tags: ['Freelancing', 'Design Agency', 'Tech Company (UI/UX)', 'Rs.4-50 LPA', 'Own Studio']
+        }
+      ],
+      colleges: [
+        { flag: 'NID', name: 'NID Ahmedabad (National Institute of Design)', sub: 'Top Design college India — NID DAT required', tags: ['NID DAT', 'Top Ranked'] },
+        { flag: 'NIFT', name: 'NIFT Delhi / Mumbai / Bangalore', sub: 'Top Fashion & Design — NIFT entrance required', tags: ['NIFT Entrance', 'Fashion & Design'] },
+        { flag: 'IIT', name: 'IIT Bombay / IIT Delhi (IDC / DSC)', sub: 'IIT Design programs — UCEED required', tags: ['UCEED', 'IIT Design'] },
+        { flag: 'SPA', name: 'SPA Delhi / CEPT Ahmedabad', sub: 'Top Architecture colleges — NATA required', tags: ['NATA', 'B.Arch'] }
+      ],
+      countries: [
+        { flag: 'IN', name: 'India', sub: 'NID, NIFT, IIT Design — globally respected, very affordable', tags: ['Affordable', 'Entrance Required'] },
+        { flag: 'IT', name: 'Italy / France', sub: 'Politecnico di Milano, Parsons Paris — world fashion & design capital', tags: ['Fashion Capital', 'Portfolio Required'] },
+        { flag: 'UK', name: 'UK', sub: 'Royal College of Art, UAL — top global design schools', tags: ['Top Ranked', 'Portfolio + IELTS'] },
+        { flag: 'US', name: 'USA', sub: 'Rhode Island School of Design, Parsons NYC — top design programs', tags: ['Portfolio + SAT', 'High Fees'] }
+      ],
+      jobs: [
+        { title: 'Freelance Graphic Designer', meta: 'Remote, Flexible, Photoshop / Illustrator needed', pay: 'Rs.10k-50k/mo' },
+        { title: 'Social Media Content Creator', meta: 'Remote, Part-time, Canva / Design tools', pay: 'Rs.8k-25k/mo' },
+        { title: 'UI/UX Design Intern', meta: 'Remote startups, 20 hrs/week, Figma skills', pay: 'Rs.8k-20k/mo' },
+        { title: 'Logo & Branding Freelancer', meta: 'Remote, Flexible, Portfolio needed', pay: 'Rs.10k-40k/mo' },
+        { title: 'Photography & Video Editing', meta: 'Remote/On-site, Flexible, Camera + editing skills', pay: 'Rs.10k-35k/mo' }
+      ]
+    },
+
+    'aviation': {
+      keywords: ['pilot','commercial pilot','airline pilot','aviation','aircraft','flight','aeronautical','air hostess','cabin crew','air traffic control','atc','aerospace','drone pilot','helicopter pilot','cpl','atpl'],
+      icon: 'AVIATION & AEROSPACE',
+      roadmap: [
+        {
+          phase: 'Phase 1 — 10th Grade',
+          title: 'Strong Foundation in Science & Maths',
+          desc: 'Score 60%+ in 10th boards with Science and Mathematics. Check your medical fitness early — pilots need to pass Class 1 Medical Certificate (DGCA). Good eyesight (correctable to 6/6) and no colour blindness are key requirements.',
+          tags: ['10th Boards', '60%+ Required', 'Science & Maths', 'Medical Fitness Check']
+        },
+        {
+          phase: 'Phase 2 — 11th & 12th (PCM)',
+          title: 'Science Stream with Physics & Maths — Mandatory',
+          desc: 'Physics and Mathematics in 12th are MANDATORY to become a pilot in India (DGCA requirement). Score 50%+ in PCM. English proficiency is also tested. Optionally appear for NDA exam after 12th for Indian Air Force (IAF) route.',
+          tags: ['PCM Mandatory', '50%+ in Physics & Maths', 'English Proficiency', 'NDA Option (IAF)']
+        },
+        {
+          phase: 'Phase 3 — CPL Training',
+          title: 'Get Student Pilot License then Commercial Pilot License (CPL)',
+          desc: 'Appear for DGCA (Directorate General of Civil Aviation) entrance and get SPL (Student Pilot License) first. Then complete 200+ flying hours at a DGCA-approved flying school. Pass DGCA theory papers (Air Navigation, Meteorology, Technical General, RTR). Get CPL after all requirements are met.',
+          tags: ['SPL First', 'DGCA Approved Flying School', '200+ Flying Hours', 'DGCA Theory Papers', 'CPL']
+        },
+        {
+          phase: 'Phase 4 — Type Rating & Airline Selection',
+          title: 'Get Type Rating & Join an Airline',
+          desc: 'After CPL, get Type Rating on a specific aircraft (Boeing 737 or Airbus A320 for commercial airlines). Appear for airline cadet programs (IndiGo, Air India, SpiceJet cadet program). Most airlines require 1500+ flying hours. Starting salary as First Officer is Rs.1.5-3L/month.',
+          tags: ['Type Rating', 'B737 / A320', 'Airline Cadet Program', '1500+ Hours', 'First Officer']
+        },
+        {
+          phase: 'Phase 5 — Captain & Senior Career',
+          title: 'Become Captain & Grow Your Career',
+          desc: 'After 3000+ flying hours, you upgrade from First Officer to Captain. Captains of wide-body aircraft (A380, B777) earn Rs.5-15L/month. Indian pilots are in high demand globally. Optionally join IAF, helicopter companies, or cargo airlines.',
+          tags: ['3000+ Hours', 'Captain Upgrade', 'Rs.5-15L/mo', 'IAF / Cargo / Helicopter']
+        }
+      ],
+      colleges: [
+        { flag: 'FLY', name: 'Indira Gandhi Rashtriya Uran Akademi (IGRUA)', sub: 'Raebareli, UP — Top Govt Flying School India', tags: ['DGCA Approved', 'Govt School'] },
+        { flag: 'FLY', name: 'Bombay Flying Club / NFTI', sub: 'Mumbai — Top Private Flying Schools India', tags: ['DGCA Approved', 'Mumbai'] },
+        { flag: 'FLY', name: 'CAE Melbourne / ATP Flight School', sub: 'Abroad — World-class aviation training programs', tags: ['International CPL', 'ICAO Licence'] },
+        { flag: 'MIL', name: 'NDA Pune / Air Force Academy Hyderabad', sub: 'Indian Air Force — NDA exam after 12th', tags: ['NDA Exam', 'IAF Career'] }
+      ],
+      countries: [
+        { flag: 'IN', name: 'India', sub: 'DGCA-approved flying schools — pilot demand is growing fast in Indian aviation', tags: ['DGCA Required', 'IndiGo / Air India'] },
+        { flag: 'US', name: 'USA', sub: 'FAA licence — Embry-Riddle, ATP Flight School — globally accepted CPL', tags: ['FAA Licence', 'Globally Valid'] },
+        { flag: 'AU', name: 'Australia', sub: 'CASA licence — great weather for flying training, quality schools', tags: ['CASA Licence', 'Good Training Weather'] },
+        { flag: 'NZ', name: 'New Zealand / South Africa', sub: 'Affordable CPL training, internationally recognised licences', tags: ['Budget Friendly', 'ICAO Licence'] }
+      ],
+      jobs: [
+        { title: 'Airline Ground Staff / Ramp Agent', meta: 'Airport, Part-time, Physical fitness needed', pay: 'Rs.12k-25k/mo' },
+        { title: 'Aviation English Tutor', meta: 'Remote, Evenings, Strong English + Aviation basics', pay: 'Rs.10k-20k/mo' },
+        { title: 'Flight Simulator Instructor Assistant', meta: 'Flying School, Part-time, Aviation student', pay: 'Rs.8k-15k/mo' },
+        { title: 'Drone Pilot (Commercial)', meta: 'Freelance, Flexible, Drone licence needed', pay: 'Rs.15k-40k/mo' },
+        { title: 'Aviation Content Writer / Blogger', meta: 'Remote, Flexible, Passion for aviation', pay: 'Rs.5k-15k/mo' }
+      ]
+    },
+
+    'arts_media': {
+      keywords: ['actor','acting','film','cinema','director','filmmaker','writer','author','journalist','content creator','youtuber','influencer','photographer','videographer','editor','music','musician','singer','dancer','choreographer','artist','painter','sculptor','theatre','media','journalist','broadcasting','public relations','pr','advertising','marketing'],
+      icon: 'ARTS, MEDIA & ENTERTAINMENT',
+      roadmap: [
+        {
+          phase: 'Phase 1 — 10th Grade',
+          title: 'Identify Your Creative Talent Early',
+          desc: 'Score decently in 10th boards. More importantly, start practising your craft NOW — write regularly, shoot videos, perform in school plays, learn an instrument, or paint. Build a body of work from as early as possible. Real talent is shown through output, not degrees.',
+          tags: ['10th Boards', 'Start Your Craft NOW', 'School Performances', 'Build Early Portfolio']
+        },
+        {
+          phase: 'Phase 2 — 11th & 12th',
+          title: 'Arts / Any Stream + Build Your Portfolio',
+          desc: 'Arts stream with English, History, Sociology, Fine Arts is ideal. But any stream is accepted for most media and arts colleges. Build a strong portfolio or reel during this time. Start a YouTube channel, blog, or Instagram page to build your audience.',
+          tags: ['Arts Stream Preferred', 'English & Fine Arts', 'Start YouTube / Blog', 'Portfolio Building']
+        },
+        {
+          phase: 'Phase 3 — Entrance Exams & College',
+          title: 'Apply to Mass Comm / Arts / Film Schools',
+          desc: 'For Journalism/Media: Apply to IIMC Delhi (entrance exam), Symbiosis, or Delhi School of Communication. For Film: FTII Pune (entrance test), Whistling Woods Mumbai. For Music/Dance: Gandharva Mahavidyalaya, Sangeet Natak Akademi. For Fine Arts: BFA at Jamia, MSU Baroda.',
+          tags: ['IIMC Entrance (Journalism)', 'FTII / NSD Entrance', 'BA Mass Comm', 'BFA (Fine Arts)']
+        },
+        {
+          phase: 'Phase 4 — Degree + Real Work',
+          title: 'Complete Degree While Doing Real Work',
+          desc: 'Do BA Mass Comm, BFA, or BA English (3 years). But more importantly — freelance, intern at media houses, write for publications, perform at events, submit films to festivals. In creative fields, your work portfolio matters more than your degree alone.',
+          tags: ['BA/BFA 3-4 Years', 'Media Internships', 'Film Festivals', 'Freelance Gigs', 'Build Audience']
+        },
+        {
+          phase: 'Phase 5 — Career',
+          title: 'Build Your Name & Go Professional',
+          desc: 'Journalists at top outlets earn Rs.4-15 LPA. YouTubers and creators with 100k+ subscribers earn Rs.50k-5L/month. Actors, musicians, and artists have variable but high earnings at the top. Consistency, networking, and unique voice are what separate successful artists from the rest.',
+          tags: ['Freelance / Employed', 'Build Audience', 'Networking', 'Rs.4L-Unlimited']
+        }
+      ],
+      colleges: [
+        { flag: 'GOV', name: 'IIMC Delhi (Indian Inst of Mass Comm)', sub: 'Top Journalism school — entrance exam required', tags: ['IIMC Entrance', 'Govt', 'Top Journalism'] },
+        { flag: 'GOV', name: 'FTII Pune / Whistling Woods Mumbai', sub: 'Top Film / Media schools — entrance + portfolio', tags: ['FTII Entrance', 'Film / TV'] },
+        { flag: 'UNI', name: 'Jamia Millia / DU (BA Mass Comm)', sub: 'Delhi — affordable, strong media network', tags: ['Entrance Exam', 'Affordable'] },
+        { flag: 'PVT', name: 'Symbiosis Institute of Media / SCMC Pune', sub: 'Top Private — Journalism, PR, Media', tags: ['SNAP Entrance', 'Private'] }
+      ],
+      countries: [
+        { flag: 'IN', name: 'India', sub: 'Bollywood, OTT, media boom — huge opportunities in Indian creative industry', tags: ['Growing Industry', 'Hindi + Regional'] },
+        { flag: 'US', name: 'USA', sub: 'Hollywood, NYU Tisch, USC Film — world centre of entertainment', tags: ['Film Portfolio', 'Hollywood Network'] },
+        { flag: 'UK', name: 'UK', sub: 'BAFTA, BBC, RADA — strong arts and media heritage', tags: ['IELTS Required', 'Arts Hub'] },
+        { flag: 'AU', name: 'Australia', sub: 'AFTRS, VCA — great film schools, strong creative industry', tags: ['Film / Arts', 'PR Pathway'] }
+      ],
+      jobs: [
+        { title: 'Freelance Content Writer / Blogger', meta: 'Remote, Flexible, Strong English needed', pay: 'Rs.8k-30k/mo' },
+        { title: 'Social Media Manager', meta: 'Remote, Part-time, Content creation skills', pay: 'Rs.10k-30k/mo' },
+        { title: 'Photographer / Videographer', meta: 'Freelance, Flexible, Camera + editing skills', pay: 'Rs.10k-50k/mo' },
+        { title: 'YouTube / Podcast Creator', meta: 'Remote, Self-paced, Microphone + editing needed', pay: 'Rs.0-2L/mo (growth)' },
+        { title: 'Theatre / Event Performer', meta: 'On-site, Weekend gigs, Acting / Dance skills', pay: 'Rs.3k-20k per event' }
+      ]
+    },
+
+    'business': {
+      keywords: ['entrepreneur','startup','founder','business','mba','management','marketing','sales','hr','human resources','operations','supply chain','logistics','retail','e-commerce','brand manager','product manager','consultant','strategy','bba','b.com','commerce'],
+      icon: 'BUSINESS, MANAGEMENT & ENTREPRENEURSHIP',
+      roadmap: [
+        {
+          phase: 'Phase 1 — 10th Grade',
+          title: 'Build Communication & Analytical Skills',
+          desc: 'Score 80%+ in 10th boards. Focus on Mathematics and English. Start reading about business and entrepreneurship — books like Rich Dad Poor Dad, Zero to One. Participate in debates, MUNs, and school business fests.',
+          tags: ['10th Boards', 'Strong Maths & English', 'MUNs & Debates', 'Business Books']
+        },
+        {
+          phase: 'Phase 2 — 11th & 12th (Commerce)',
+          title: 'Commerce Stream with Maths',
+          desc: 'Take Accountancy, Business Studies, Economics, and Mathematics in 11th. Score 75%+ in 12th. Optionally pursue Science if you plan for an Engineering + MBA path (common for IIM candidates). Start a small business or side project during school.',
+          tags: ['Commerce + Maths', 'Accountancy', 'Economics', 'Side Project / Internship']
+        },
+        {
+          phase: 'Phase 3 — Entrance Exams',
+          title: 'BBA Entrance or B.Com Admissions',
+          desc: 'For BBA: Appear for IPU CET, SET (Symbiosis), Christ University entrance, or DUJAT (Delhi University). For B.Com: DU cutoffs are 97%+ for top colleges. For Engineering then MBA path: Crack JEE for B.Tech first. IPMAT exam for IIM Integrated Programs after 12th.',
+          tags: ['IPMAT (IIM after 12th)', 'DUJAT / IPU CET', 'SET Symbiosis', 'Christ Entrance']
+        },
+        {
+          phase: 'Phase 4 — BBA / B.Com Degree + MBA Prep',
+          title: 'Complete Degree & Prepare for MBA',
+          desc: 'Complete BBA or B.Com in 3 years. Build leadership experience through college clubs, startups, or internships. Start preparing for CAT/XAT in your 2nd year. Aim for a strong profile — good academics + leadership + internships for top IIMs.',
+          tags: ['BBA / B.Com 3 Years', 'CAT / XAT Prep', 'College Leadership', 'Startup / Internship']
+        },
+        {
+          phase: 'Phase 5 — MBA & Career',
+          title: 'MBA from IIM or Start Your Business',
+          desc: 'MBA from IIM A/B/C gets Rs.25-60 LPA packages. Top roles: Management Consultant (McKinsey, BCG), Product Manager, Investment Banker, or Marketing Head. Alternatively, directly start your own startup. Entrepreneurship ecosystem in India is world class — this is the best time.',
+          tags: ['IIM MBA', 'CAT 95%ile+', 'McKinsey / BCG', 'Own Startup', 'Rs.15-60 LPA']
+        }
+      ],
+      colleges: [
+        { flag: 'IIM', name: 'IIM Ahmedabad / Bangalore / Calcutta', sub: '#1 MBA programs India — CAT 99%ile required', tags: ['CAT', 'Rs.30-60 LPA'] },
+        { flag: 'UNI', name: 'SRCC Delhi / IIMC Calcutta', sub: 'Top B.Com / BBA / MBA colleges', tags: ['DU Cutoff 97%+', 'Top Alumni'] },
+        { flag: 'PVT', name: 'Symbiosis / NMIMS / Christ University', sub: 'Top Private BBA / MBA programs', tags: ['Entrance Test', 'Good Placements'] },
+        { flag: 'IIT', name: 'IIT Bombay / Delhi (MBA / PGDM)', sub: 'IIT Business Schools — strong for tech + business', tags: ['CAT + GMAT', 'Tech-Business Combo'] }
+      ],
+      countries: [
+        { flag: 'IN', name: 'India', sub: 'IIM, XLRI, MDI — world-class MBA at fraction of global cost', tags: ['Affordable', 'CAT Required'] },
+        { flag: 'US', name: 'USA', sub: 'Harvard, Wharton, Stanford GSB — top global MBA, Wall Street access', tags: ['GMAT + IELTS', '$150-300K Jobs'] },
+        { flag: 'UK', name: 'UK', sub: 'LBS, Oxford Said, Cambridge Judge — Europe top MBA programs', tags: ['GMAT + IELTS', 'London Business Hub'] },
+        { flag: 'SG', name: 'Singapore / Hong Kong', sub: 'INSEAD, NUS — Asia business hubs, strong ROI', tags: ['GMAT', 'Asia Business Hub'] }
+      ],
+      jobs: [
+        { title: 'Campus Ambassador / Brand Rep', meta: 'Your college, Flexible, Communication skills', pay: 'Rs.5k-15k/mo' },
+        { title: 'Social Media Marketing Intern', meta: 'Remote, Part-time, Creative + analytics skills', pay: 'Rs.8k-20k/mo' },
+        { title: 'E-commerce / Dropshipping', meta: 'Remote, Self-paced, Low investment to start', pay: 'Rs.10k-1L/mo' },
+        { title: 'Sales Executive (Startup)', meta: 'Remote or On-site, Commission-based, Communication', pay: 'Rs.8k-30k/mo' },
+        { title: 'Event Management Assistant', meta: 'On-site, Weekends, Organisational skills', pay: 'Rs.5k-15k/mo' }
+      ]
+    }
+  };
+
+  // ════════════════════════════════════════════
+  //  SMART CATEGORY MATCHER
+  //  Detects which category any typed career belongs to
+  // ════════════════════════════════════════════
+  function detectCategory(goal) {
+    var g = goal.toLowerCase();
+    var bestMatch = null;
+    var bestScore = 0;
+
+    for (var cat in careerCategories) {
+      var keywords = careerCategories[cat].keywords;
+      var score = 0;
+      for (var i = 0; i < keywords.length; i++) {
+        if (g.indexOf(keywords[i]) !== -1) {
+          // Longer keyword match = higher score
+          score += keywords[i].length;
+        }
+      }
+      if (score > bestScore) {
+        bestScore = score;
+        bestMatch = cat;
+      }
+    }
+
+    // If no keyword matched at all, return a smart default
+    // based on common single words
+    if (bestScore === 0) {
+      if (g.indexOf('teach') !== -1 || g.indexOf('professor') !== -1 || g.indexOf('education') !== -1) return 'government';
+      if (g.indexOf('sport') !== -1 || g.indexOf('athlete') !== -1 || g.indexOf('cricket') !== -1 || g.indexOf('football') !== -1) return 'arts_media';
+      if (g.indexOf('chef') !== -1 || g.indexOf('cook') !== -1 || g.indexOf('hotel') !== -1 || g.indexOf('hospitality') !== -1) return 'business';
+      if (g.indexOf('psychol') !== -1 || g.indexOf('counsell') !== -1 || g.indexOf('therapist') !== -1 || g.indexOf('social work') !== -1) return 'government';
+      return null; // truly unknown
+    }
+
+    return bestMatch;
+  }
+
+  // Build roadmap for unrecognised career using a smart generic template
+  function buildGenericRoadmap(goal) {
+    var g = goal.trim();
+    var capGoal = g.charAt(0).toUpperCase() + g.slice(1);
+    return {
+      roadmap: [
+        {
+          phase: 'Phase 1 — 10th Grade',
+          title: 'Build a Strong Academic Foundation',
+          desc: 'Score 80%+ in 10th boards. Understand the basic subjects required for your chosen field. Start researching what stream and subjects are needed for a career as a ' + capGoal + '. Speak to professionals already in the field.',
+          tags: ['10th Boards', '80%+ Target', 'Research Your Field', 'Talk to Professionals']
+        },
+        {
+          phase: 'Phase 2 — 11th & 12th',
+          title: 'Choose the Right Stream for ' + capGoal,
+          desc: 'Research and pick the stream that best aligns with becoming a ' + capGoal + '. This is a critical decision — the wrong stream can delay you by 2+ years. Score 70%+ in 12th boards and build relevant skills alongside your studies.',
+          tags: ['Stream Selection', '70%+ in 12th', 'Relevant Skills', 'Entrance Exam Prep']
+        },
+        {
+          phase: 'Phase 3 — Entrance Exams & Admission',
+          title: 'Apply to Top Colleges for Your Field',
+          desc: 'Research the top entrance exams required for colleges that offer ' + capGoal + ' programs in India. Apply to government colleges first (lower fees, higher value). Also explore state-level exams and private college entrances. Keep 5-10 backup options.',
+          tags: ['Research Entrance Exams', 'Government Colleges First', 'State Level Exams', 'Private College Options']
+        },
+        {
+          phase: 'Phase 4 — Degree + Internships',
+          title: 'Complete Your Degree with Real Experience',
+          desc: 'During your 3-5 year degree, do at least 2 internships in your field, build a portfolio of projects, and network with professionals. Join student clubs and associations related to ' + capGoal + '. Real experience alongside your degree sets you apart from the crowd.',
+          tags: ['3-5 Year Degree', '2+ Internships', 'Build Portfolio', 'Networking', 'Student Clubs']
+        },
+        {
+          phase: 'Phase 5 — Career Launch',
+          title: 'Land Your First Role as ' + capGoal,
+          desc: 'Apply through campus placements, job portals (LinkedIn, Naukri, Internshala), and your college network. Build a strong resume and LinkedIn profile. Your first job is just the start — keep upskilling every year. Many top ' + capGoal + 's take 2-3 years to land their ideal role.',
+          tags: ['Campus Placement', 'LinkedIn / Naukri', 'Strong Resume', 'Keep Upskilling', '2-3 Year Growth']
+        }
+      ],
+      colleges: [
+        { flag: 'GOV', name: 'Top Government University in Your State', sub: 'Affordable, Government-recognised, Lower fees', tags: ['Govt Subsidised', 'State Entrance'] },
+        { flag: 'NAT', name: 'Central / National Universities (UGC Listed)', sub: 'Delhi, JNU, BHU, Hyderabad University', tags: ['UGC Recognised', 'Quality Faculty'] },
+        { flag: 'PVT', name: 'Reputed Private College in Your City', sub: 'Private, Industry tie-ups, Better infrastructure', tags: ['Private', 'Industry Network'] },
+        { flag: 'INT', name: 'International College via Scholarship', sub: 'Fulbright / Commonwealth / DAAD scholarship options', tags: ['Scholarship Required', 'Research Opportunities'] }
+      ],
+      countries: [
+        { flag: 'IN', name: 'India', sub: 'Start in India — build your base, credentials, and network first', tags: ['Affordable', 'Best Starting Point'] },
+        { flag: 'US', name: 'USA', sub: 'Top global programs, high salaries, research opportunities in all fields', tags: ['SAT / GRE + IELTS', 'High Earning Potential'] },
+        { flag: 'UK', name: 'UK', sub: 'Prestigious universities, shorter degree duration, strong global brand', tags: ['IELTS Required', '1-2 Yr Masters'] },
+        { flag: 'DE', name: 'Germany / Canada', sub: 'Affordable or free tuition, strong career prospects, PR-friendly countries', tags: ['Low Tuition', 'PR Pathway'] }
+      ],
+      jobs: [
+        { title: 'Freelance in Your Skill Area', meta: 'Remote, Flexible, Build your portfolio while studying', pay: 'Rs.8k-30k/mo' },
+        { title: 'Online Tutor in Your Subject', meta: 'Remote, Evenings, Teach what you know well', pay: 'Rs.10k-25k/mo' },
+        { title: 'Research / Admin Intern', meta: 'On-site or Remote, 15-20 hrs/week, Communication skills', pay: 'Rs.5k-15k/mo' },
+        { title: 'Content Writer in Your Field', meta: 'Remote, Flexible, Strong writing + domain knowledge', pay: 'Rs.8k-20k/mo' },
+        { title: 'Campus Representative / Ambassador', meta: 'Your College, Flexible, Communication + networking', pay: 'Rs.3k-10k/mo' }
+      ]
+    };
+  }
+
+  // ════════════════════════════════════════════
+  //  MAIN GENERATE FUNCTION
+  // ════════════════════════════════════════════
+  function generateRoadmap() {
+    var level = document.getElementById('currentLevel').value;
+    var goal  = document.getElementById('careerGoal').value.trim();
+
+    if (!level) { showToast('Please select your current level'); return; }
+    if (!goal)  { showToast('Please enter your career goal'); return; }
+
+    document.getElementById('heroSection').style.display = 'none';
+    document.getElementById('loadingWrap').classList.add('show');
+    document.getElementById('resultWrap').classList.remove('show');
+    document.getElementById('generateBtn').disabled = true;
+    animateLoader();
+
+    setTimeout(function() {
+      clearInterval(loaderInterval);
+      document.getElementById('loadingWrap').classList.remove('show');
+      document.getElementById('generateBtn').disabled = false;
+
+      var cat = detectCategory(goal);
+      var data;
+      if (cat) {
+        data = careerCategories[cat];
+      } else {
+        data = buildGenericRoadmap(goal);
+      }
+      renderResults(data, goal);
+    }, 3500);
+  }
+
+  // ── RENDER RESULTS ──
+  function renderResults(data, goal) {
+    document.getElementById('resultGoalTitle').textContent = goal.toUpperCase();
+
+    var colors = ['tag-c','tag-p','tag-o'];
+
+    // ROADMAP
+    var roadmapHTML = '';
+    if (data.roadmap && data.roadmap.length) {
+      for (var i = 0; i < data.roadmap.length; i++) {
+        var item = data.roadmap[i];
+        var tagsHTML = '';
+        if (item.tags) {
+          for (var j = 0; j < item.tags.length; j++) {
+            tagsHTML += '<span class="tag ' + colors[j % 3] + '">' + item.tags[j] + '</span>';
+          }
+        }
+        roadmapHTML += '<div class="tl-item" style="animation-delay:' + (i * 0.1) + 's">' +
+          '<div class="tl-dot"></div>' +
+          '<div class="tl-phase">' + (item.phase || '') + '</div>' +
+          '<div class="tl-title">' + (item.title || '') + '</div>' +
+          '<div class="tl-desc">' + (item.desc || '') + '</div>' +
+          '<div class="tl-tags">' + tagsHTML + '</div>' +
+          '</div>';
+      }
+    }
+    document.getElementById('roadmapContent').innerHTML = roadmapHTML || '<div class="error-box">No roadmap data.</div>';
+
+    // COLLEGES
+    var collegesHTML = '';
+    if (data.colleges && data.colleges.length) {
+      for (var i = 0; i < data.colleges.length; i++) {
+        var c = data.colleges[i];
+        var tagsHTML = '';
+        if (c.tags) {
+          for (var j = 0; j < c.tags.length; j++) {
+            tagsHTML += '<span class="tag tag-c">' + c.tags[j] + '</span>';
+          }
+        }
+        collegesHTML += '<div class="info-card">' +
+          '<div class="info-card-flag" style="font-size:0.8rem;font-weight:700;color:var(--accent);margin-bottom:0.5rem;">' + (c.flag || '') + '</div>' +
+          '<div class="info-card-name">' + (c.name || '') + '</div>' +
+          '<div class="info-card-sub">' + (c.sub || '') + '</div>' +
+          '<div class="tl-tags">' + tagsHTML + '</div>' +
+          '</div>';
+      }
+    }
+    document.getElementById('collegesContent').innerHTML = collegesHTML || '<div class="error-box">No data.</div>';
+
+    // COUNTRIES
+    var countriesHTML = '';
+    if (data.countries && data.countries.length) {
+      for (var i = 0; i < data.countries.length; i++) {
+        var c = data.countries[i];
+        var tagsHTML = '';
+        if (c.tags) {
+          for (var j = 0; j < c.tags.length; j++) {
+            tagsHTML += '<span class="tag ' + colors[j % 3] + '">' + c.tags[j] + '</span>';
+          }
+        }
+        countriesHTML += '<div class="info-card">' +
+          '<div class="info-card-flag" style="font-size:0.85rem;font-weight:700;color:var(--accent);margin-bottom:0.5rem;">' + (c.flag || '') + '</div>' +
+          '<div class="info-card-name">' + (c.name || '') + '</div>' +
+          '<div class="info-card-sub">' + (c.sub || '') + '</div>' +
+          '<div class="tl-tags">' + tagsHTML + '</div>' +
+          '</div>';
+      }
+    }
+    document.getElementById('countriesContent').innerHTML = countriesHTML || '<div class="error-box">No data.</div>';
+
+    // JOBS
+    var jobsHTML = '';
+    if (data.jobs && data.jobs.length) {
+      for (var i = 0; i < data.jobs.length; i++) {
+        var j = data.jobs[i];
+        jobsHTML += '<div class="job-item">' +
+          '<div><div class="job-title">' + (j.title || '') + '</div>' +
+          '<div class="job-meta">' + (j.meta || '') + '</div></div>' +
+          '<div class="job-pay">' + (j.pay || '') + '</div>' +
+          '</div>';
+      }
+    }
+    document.getElementById('jobsContent').innerHTML = jobsHTML || '<div class="error-box">No data.</div>';
+
+    document.getElementById('resultWrap').classList.add('show');
+    document.querySelectorAll('.tab').forEach(function(t) { t.classList.remove('active'); });
+    document.querySelectorAll('.tab-pane').forEach(function(p) { p.classList.remove('active'); });
+    document.querySelectorAll('.tab')[0].classList.add('active');
+    document.getElementById('tabRoadmap').classList.add('active');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+</script>
+</body>
+</html>

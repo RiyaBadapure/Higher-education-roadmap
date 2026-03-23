@@ -1,0 +1,1036 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>PathForge — Login / Sign Up</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #03050a;
+      --surface: #0a0e18;
+      --surface2: #111827;
+      --border: rgba(255,255,255,0.07);
+      --border-focus: rgba(0,255,204,0.4);
+      --accent: #00ffcc;
+      --accent2: #ff4d6d;
+      --text: #f0f4ff;
+      --muted: #5a6a85;
+      --error: #ff4d6d;
+      --success: #00ffcc;
+    }
+
+    html, body {
+      height: 100%;
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Outfit', sans-serif;
+      overflow-x: hidden;
+    }
+
+    /* BACKGROUND */
+    canvas#bg { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
+
+    .grid-overlay {
+      position: fixed; inset: 0; z-index: 0; pointer-events: none;
+      background-image:
+        linear-gradient(rgba(0,255,204,0.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,255,204,0.025) 1px, transparent 1px);
+      background-size: 50px 50px;
+      mask-image: radial-gradient(ellipse 70% 70% at 50% 50%, black 20%, transparent 100%);
+    }
+
+    .blob {
+      position: fixed; border-radius: 50%;
+      filter: blur(90px); pointer-events: none; z-index: 0;
+    }
+    .blob1 {
+      width: 500px; height: 500px;
+      background: radial-gradient(circle, rgba(0,255,204,0.07), transparent 70%);
+      top: -80px; right: -80px;
+      animation: blobDrift 16s ease-in-out infinite;
+    }
+    .blob2 {
+      width: 400px; height: 400px;
+      background: radial-gradient(circle, rgba(255,77,109,0.05), transparent 70%);
+      bottom: -60px; left: -60px;
+      animation: blobDrift 20s ease-in-out infinite reverse;
+    }
+    @keyframes blobDrift {
+      0%,100% { transform: translate(0,0); }
+      50% { transform: translate(30px,-30px); }
+    }
+
+    /* LAYOUT */
+    .page {
+      position: relative; z-index: 1;
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+    }
+
+    /* LEFT PANEL */
+    .left-panel {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 2.5rem 3rem;
+      border-right: 1px solid var(--border);
+      background: rgba(0,0,0,0.2);
+    }
+
+    .logo {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 2rem;
+      letter-spacing: 0.1em;
+      color: var(--text);
+      text-decoration: none;
+    }
+    .logo em { color: var(--accent); font-style: normal; }
+
+    .left-hero { flex: 1; display: flex; flex-direction: column; justify-content: center; gap: 1.5rem; }
+
+    .left-tagline {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(3rem, 5vw, 4.5rem);
+      line-height: 0.95;
+      letter-spacing: 0.03em;
+    }
+
+    .left-tagline .stroke {
+      -webkit-text-stroke: 1.5px var(--accent);
+      color: transparent;
+    }
+
+    .left-desc {
+      font-size: 0.95rem;
+      color: var(--muted);
+      line-height: 1.7;
+      max-width: 340px;
+      font-weight: 300;
+    }
+
+    .left-features {
+      display: flex;
+      flex-direction: column;
+      gap: 0.7rem;
+      margin-top: 0.5rem;
+    }
+
+    .left-feat {
+      display: flex;
+      align-items: center;
+      gap: 0.7rem;
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+
+    .feat-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--accent);
+      flex-shrink: 0;
+    }
+
+    .left-bottom {
+      font-size: 0.75rem;
+      color: var(--muted);
+    }
+
+    /* RIGHT PANEL */
+    .right-panel {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+    }
+
+    .auth-box {
+      width: 100%;
+      max-width: 420px;
+    }
+
+    /* TABS */
+    .tab-switcher {
+      display: flex;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 4px;
+      margin-bottom: 2rem;
+    }
+
+    .tab-btn {
+      flex: 1;
+      padding: 0.65rem;
+      border: none;
+      background: transparent;
+      color: var(--muted);
+      font-family: 'Outfit', sans-serif;
+      font-size: 0.9rem;
+      font-weight: 500;
+      cursor: pointer;
+      border-radius: 7px;
+      transition: all 0.2s;
+    }
+
+    .tab-btn.active {
+      background: var(--surface);
+      color: var(--text);
+      box-shadow: 0 2px 12px rgba(0,0,0,0.4);
+    }
+
+    /* FORM TITLE */
+    .form-heading {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 2rem;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.3rem;
+    }
+
+    .form-sub {
+      font-size: 0.85rem;
+      color: var(--muted);
+      margin-bottom: 1.8rem;
+      font-weight: 300;
+    }
+
+    /* FORM */
+    .form-panel { display: none; }
+    .form-panel.active { display: block; animation: fadeUp 0.35s ease; }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .field {
+      margin-bottom: 1.1rem;
+    }
+
+    .field label {
+      display: block;
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 0.45rem;
+    }
+
+    .input-wrap {
+      position: relative;
+    }
+
+    .input-wrap .icon {
+      position: absolute;
+      left: 0.9rem;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 1rem;
+      pointer-events: none;
+      opacity: 0.5;
+    }
+
+    .field input {
+      width: 100%;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.75rem 1rem 0.75rem 2.6rem;
+      color: var(--text);
+      font-family: 'Outfit', sans-serif;
+      font-size: 0.95rem;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .field input:focus {
+      border-color: var(--border-focus);
+      box-shadow: 0 0 0 3px rgba(0,255,204,0.07);
+    }
+
+    .field input.error-input {
+      border-color: var(--error);
+    }
+
+    .field-error {
+      font-size: 0.75rem;
+      color: var(--error);
+      margin-top: 0.35rem;
+      display: none;
+    }
+
+    .field-error.show { display: block; }
+
+    /* PASSWORD TOGGLE */
+    .toggle-pw {
+      position: absolute;
+      right: 0.9rem;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      color: var(--muted);
+      cursor: pointer;
+      font-size: 1rem;
+      padding: 0;
+      transition: color 0.2s;
+    }
+    .toggle-pw:hover { color: var(--text); }
+
+    /* OTP SECTION */
+    .otp-section {
+      display: none;
+      margin-bottom: 1.1rem;
+    }
+    .otp-section.show { display: block; animation: fadeUp 0.3s ease; }
+
+    .otp-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 0.45rem;
+    }
+
+    .otp-header label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .resend-btn {
+      font-size: 0.75rem;
+      color: var(--accent);
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-family: 'Outfit', sans-serif;
+      font-weight: 500;
+      transition: opacity 0.2s;
+    }
+    .resend-btn:hover { opacity: 0.7; }
+    .resend-btn:disabled { color: var(--muted); cursor: default; }
+
+    .otp-boxes {
+      display: flex;
+      gap: 0.6rem;
+    }
+
+    .otp-boxes input {
+      flex: 1;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.4rem 0;
+      text-align: center;
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 1rem;
+      width: 28px;
+      height: 28px;
+      letter-spacing: 0.05em;
+      color: var(--text);
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .otp-boxes input:focus {
+      border-color: var(--border-focus);
+      box-shadow: 0 0 0 3px rgba(0,255,204,0.07);
+    }
+
+    .otp-boxes input.filled {
+      border-color: rgba(0,255,204,0.3);
+      color: var(--accent);
+    }
+
+    /* SEND OTP BUTTON */
+    .send-otp-btn {
+      width: 100%;
+      margin-bottom: 1.1rem;
+      background: rgba(0,255,204,0.08);
+      color: var(--accent);
+      border: 1px solid rgba(0,255,204,0.2);
+      border-radius: 8px;
+      padding: 0.75rem;
+      font-family: 'Outfit', sans-serif;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: none;
+    }
+    .send-otp-btn.show { display: block; }
+    .send-otp-btn:hover { background: rgba(0,255,204,0.14); }
+    .send-otp-btn:disabled { opacity: 0.5; cursor: default; }
+
+    /* SUBMIT BUTTON */
+    .submit-btn {
+      width: 100%;
+      background: var(--accent);
+      color: #000;
+      border: none;
+      border-radius: 8px;
+      padding: 0.9rem;
+      font-family: 'Outfit', sans-serif;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.25s;
+      position: relative;
+      overflow: hidden;
+      margin-top: 0.5rem;
+    }
+
+    .submit-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 0 25px rgba(0,255,204,0.35), 0 8px 20px rgba(0,255,204,0.15);
+    }
+
+    .submit-btn:active { transform: translateY(0); }
+
+    .submit-btn:disabled {
+      opacity: 0.5;
+      cursor: default;
+      transform: none;
+      box-shadow: none;
+    }
+
+    /* LOADING SPINNER IN BTN */
+    .btn-spinner {
+      display: none;
+      width: 18px; height: 18px;
+      border: 2px solid rgba(0,0,0,0.3);
+      border-top-color: #000;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      margin: 0 auto;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .btn-text { display: block; }
+
+    /* TOAST */
+    .toast {
+      position: fixed;
+      bottom: 2rem;
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 0.9rem 1.5rem;
+      font-size: 0.88rem;
+      font-weight: 500;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      opacity: 0;
+      transition: all 0.3s ease;
+      z-index: 999;
+      pointer-events: none;
+      white-space: nowrap;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    .toast.success { border-color: rgba(0,255,204,0.3); }
+    .toast.error-toast { border-color: rgba(255,77,109,0.3); }
+
+    /* DIVIDER */
+    .divider {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin: 1.2rem 0;
+      color: var(--muted);
+      font-size: 0.78rem;
+    }
+    .divider::before, .divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    /* SUCCESS STATE */
+    .success-state {
+      display: none;
+      text-align: center;
+      padding: 2rem 0;
+      animation: fadeUp 0.4s ease;
+    }
+    .success-state.show { display: block; }
+
+    .success-icon {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+      animation: popIn 0.4s cubic-bezier(0.34,1.56,0.64,1) both;
+    }
+
+    @keyframes popIn {
+      from { transform: scale(0); }
+      to   { transform: scale(1); }
+    }
+
+    .success-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 1.8rem;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.5rem;
+      color: var(--accent);
+    }
+
+    .success-desc {
+      font-size: 0.88rem;
+      color: var(--muted);
+      margin-bottom: 1.5rem;
+      line-height: 1.6;
+    }
+
+    /* TIMER */
+    .timer-text {
+      font-size: 0.75rem;
+      color: var(--muted);
+      text-align: center;
+      margin-top: 0.6rem;
+    }
+
+    .timer-text span { color: var(--accent); font-weight: 600; }
+
+    /* FOOTER NOTE */
+    .auth-footer {
+      font-size: 0.75rem;
+      color: var(--muted);
+      text-align: center;
+      margin-top: 1.5rem;
+      line-height: 1.6;
+    }
+
+    .auth-footer a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+
+    /* STRENGTH BAR */
+    .strength-bar-wrap {
+      margin-top: 0.4rem;
+      display: none;
+    }
+    .strength-bar-wrap.show { display: block; }
+
+    .strength-bar {
+      height: 3px;
+      border-radius: 2px;
+      background: var(--border);
+      overflow: hidden;
+    }
+
+    .strength-fill {
+      height: 100%;
+      border-radius: 2px;
+      transition: width 0.3s, background 0.3s;
+      width: 0%;
+    }
+
+    .strength-label {
+      font-size: 0.7rem;
+      color: var(--muted);
+      margin-top: 0.3rem;
+    }
+
+    /* RESPONSIVE */
+    @media (max-width: 768px) {
+      .page { grid-template-columns: 1fr; }
+      .left-panel { display: none; }
+      .right-panel { padding: 2rem 1.5rem; align-items: flex-start; padding-top: 3rem; }
+    }
+  </style>
+</head>
+<body>
+
+<canvas id="bg"></canvas>
+<div class="grid-overlay"></div>
+<div class="blob blob1"></div>
+<div class="blob blob2"></div>
+
+<div class="page">
+
+  <!-- LEFT PANEL -->
+  <div class="left-panel">
+    <a href="welcome.html" class="logo">Path<em>Forge</em></a>
+
+    <div class="left-hero">
+      <div class="left-tagline">
+        YOUR<br>
+        CAREER<br>
+        <span class="stroke">STARTS</span><br>
+        HERE
+      </div>
+      <p class="left-desc">
+        Join thousands of students navigating their path from school to a dream job — with AI-powered guidance every step of the way.
+      </p>
+      <div class="left-features">
+        <div class="left-feat"><div class="feat-dot"></div> Personalized roadmap from 10th to job</div>
+        <div class="left-feat"><div class="feat-dot"></div> Top colleges across India & abroad</div>
+        <div class="left-feat"><div class="feat-dot"></div> Part-time jobs while you study</div>
+        <div class="left-feat"><div class="feat-dot"></div> AI mock interviews & aptitude tests</div>
+      </div>
+    </div>
+
+    <div class="left-bottom">© 2025 PathForge · Built by a 2nd Year CS Student</div>
+  </div>
+
+  <!-- RIGHT PANEL -->
+  <div class="right-panel">
+    <div class="auth-box">
+
+      <!-- TAB SWITCHER -->
+      <div class="tab-switcher">
+        <button class="tab-btn active" onclick="switchTab('login')">Log In</button>
+        <button class="tab-btn" onclick="switchTab('signup')">Sign Up</button>
+      </div>
+
+      <!-- ── LOGIN PANEL ── -->
+      <div class="form-panel active" id="loginPanel">
+        <div class="form-heading">Welcome Back</div>
+        <div class="form-sub">Log in to continue your journey.</div>
+
+        <div class="field">
+          <label>Email Address</label>
+          <div class="input-wrap">
+            <span class="icon">✉️</span>
+            <input type="email" id="loginEmail" placeholder="you@example.com" oninput="clearErr('loginEmailErr')"/>
+          </div>
+          <div class="field-error" id="loginEmailErr"></div>
+        </div>
+
+        <div class="field">
+          <label>Password</label>
+          <div class="input-wrap">
+            <span class="icon">🔒</span>
+            <input type="password" id="loginPassword" placeholder="Enter your password" oninput="clearErr('loginPwErr')"/>
+            <button class="toggle-pw" type="button" onclick="togglePw('loginPassword', this)">👁</button>
+          </div>
+          <div class="field-error" id="loginPwErr"></div>
+        </div>
+
+        <button class="submit-btn" id="loginBtn" onclick="handleLogin()">
+          <span class="btn-text">Log In →</span>
+          <div class="btn-spinner" id="loginSpinner"></div>
+        </button>
+
+        <div class="auth-footer">
+          Don't have an account? <a href="#" onclick="switchTab('signup')">Sign up free</a>
+        </div>
+      </div>
+
+      <!-- ── SIGNUP PANEL ── -->
+      <div class="form-panel" id="signupPanel">
+
+        <!-- STEP 1: DETAILS -->
+        <div id="signupStep1">
+          <div class="form-heading">Create Account</div>
+          <div class="form-sub">Start your journey — it's completely free.</div>
+
+          <div class="field">
+            <label>Full Name</label>
+            <div class="input-wrap">
+              <span class="icon">👤</span>
+              <input type="text" id="signupName" placeholder="Your full name" oninput="clearErr('nameErr')"/>
+            </div>
+            <div class="field-error" id="nameErr"></div>
+          </div>
+
+          <div class="field">
+            <label>Email Address</label>
+            <div class="input-wrap">
+              <span class="icon">✉️</span>
+              <input type="email" id="signupEmail" placeholder="you@example.com" oninput="onEmailInput()"/>
+            </div>
+            <div class="field-error" id="emailErr"></div>
+          </div>
+
+          <div class="field">
+            <label>Password</label>
+            <div class="input-wrap">
+              <span class="icon">🔒</span>
+              <input type="password" id="signupPassword" placeholder="Min. 8 characters" oninput="checkStrength(this.value); clearErr('pwErr')"/>
+              <button class="toggle-pw" type="button" onclick="togglePw('signupPassword', this)">👁</button>
+            </div>
+            <div class="strength-bar-wrap" id="strengthWrap">
+              <div class="strength-bar"><div class="strength-fill" id="strengthFill"></div></div>
+              <div class="strength-label" id="strengthLabel"></div>
+            </div>
+            <div class="field-error" id="pwErr"></div>
+          </div>
+
+          <!-- SEND OTP BUTTON -->
+          <button class="send-otp-btn show" id="sendOtpBtn" onclick="sendOTP()">
+            📨 Send OTP 
+          </button>
+
+          <!-- OTP SECTION -->
+          <div class="otp-section" id="otpSection">
+            <div class="otp-header">
+              <label>Enter OTP</label>
+              <button class="resend-btn" id="resendBtn" onclick="resendOTP()" disabled>Resend OTP</button>
+            </div>
+            <div class="otp-boxes">
+              <input type="text" maxlength="1" class="otp-input" oninput="otpInput(this, 0)" onkeydown="otpBack(event, 0)"/>
+              <input type="text" maxlength="1" class="otp-input" oninput="otpInput(this, 1)" onkeydown="otpBack(event, 1)"/>
+              <input type="text" maxlength="1" class="otp-input" oninput="otpInput(this, 2)" onkeydown="otpBack(event, 2)"/>
+              <input type="text" maxlength="1" class="otp-input" oninput="otpInput(this, 3)" onkeydown="otpBack(event, 3)"/>
+              <input type="text" maxlength="1" class="otp-input" oninput="otpInput(this, 4)" onkeydown="otpBack(event, 4)"/>
+              <input type="text" maxlength="1" class="otp-input" oninput="otpInput(this, 5)" onkeydown="otpBack(event, 5)"/>
+            </div>
+            <div class="field-error show" id="otpErr" style="display:none"></div>
+            <div class="timer-text" id="timerText"></div>
+          </div>
+
+          <button class="submit-btn" id="signupBtn" onclick="handleSignup()" style="margin-top:1rem">
+            <span class="btn-text" id="signupBtnText">Create Account →</span>
+            <div class="btn-spinner" id="signupSpinner"></div>
+          </button>
+
+          <div class="auth-footer">
+            Already have an account? <a href="#" onclick="switchTab('login')">Log in</a><br>
+            By signing up you agree to our <a href="#">Terms of Service</a>.
+          </div>
+        </div>
+
+        <!-- SUCCESS STATE -->
+        <div class="success-state" id="signupSuccess">
+          <div class="success-icon">🎉</div>
+          <div class="success-title">You're In!</div>
+          <div class="success-desc">Account created successfully.<br>Redirecting you to your roadmap...</div>
+          <button class="submit-btn" onclick="goToDashboard()">Go to Dashboard →</button>
+        </div>
+
+      </div>
+      <!-- end signupPanel -->
+
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+  // ── USER STORE (simulated localStorage-free in-memory) ──
+  const users = {}; // email -> { name, password }
+  let generatedOTP = '';
+  let otpTimer = null;
+  let otpSeconds = 0;
+  let otpVerified = false;
+  let otpSent = false;
+
+  // ── TAB SWITCH ──
+  function switchTab(tab) {
+    document.querySelectorAll('.tab-btn').forEach((b, i) => {
+      b.classList.toggle('active', (tab === 'login' && i === 0) || (tab === 'signup' && i === 1));
+    });
+    document.getElementById('loginPanel').classList.toggle('active', tab === 'login');
+    document.getElementById('signupPanel').classList.toggle('active', tab === 'signup');
+  }
+
+  // ── TOGGLE PASSWORD ──
+  function togglePw(id, btn) {
+    const inp = document.getElementById(id);
+    if (inp.type === 'password') { inp.type = 'text'; btn.textContent = '🙈'; }
+    else { inp.type = 'password'; btn.textContent = '👁'; }
+  }
+
+  // ── ERROR HELPERS ──
+  function showErr(id, msg) {
+    const el = document.getElementById(id);
+    el.textContent = msg;
+    el.classList.add('show');
+    el.style.display = 'block';
+  }
+
+  function clearErr(id) {
+    const el = document.getElementById(id);
+    el.classList.remove('show');
+    el.style.display = 'none';
+  }
+
+  // ── TOAST ──
+  function showToast(msg, type = 'success') {
+    const t = document.getElementById('toast');
+    t.textContent = (type === 'success' ? '✅ ' : '❌ ') + msg;
+    t.className = 'toast show ' + (type === 'success' ? 'success' : 'error-toast');
+    setTimeout(() => { t.classList.remove('show'); }, 3500);
+  }
+
+  // ── PASSWORD STRENGTH ──
+  function checkStrength(pw) {
+    const wrap = document.getElementById('strengthWrap');
+    const fill = document.getElementById('strengthFill');
+    const label = document.getElementById('strengthLabel');
+    if (!pw) { wrap.classList.remove('show'); return; }
+    wrap.classList.add('show');
+    let score = 0;
+    if (pw.length >= 8) score++;
+    if (/[A-Z]/.test(pw)) score++;
+    if (/[0-9]/.test(pw)) score++;
+    if (/[^A-Za-z0-9]/.test(pw)) score++;
+    const levels = [
+      { w: '25%', bg: '#ff4d6d', txt: 'Weak' },
+      { w: '50%', bg: '#ff9800', txt: 'Fair' },
+      { w: '75%', bg: '#ffd600', txt: 'Good' },
+      { w: '100%', bg: '#00ffcc', txt: 'Strong 💪' },
+    ];
+    const l = levels[score - 1] || levels[0];
+    fill.style.width = l.w;
+    fill.style.background = l.bg;
+    label.textContent = l.txt;
+    label.style.color = l.bg;
+  }
+
+  // ── EMAIL INPUT: show send OTP button ──
+  function onEmailInput() {
+    clearErr('emailErr');
+  }
+
+  // ── GENERATE 6-DIGIT OTP ──
+  function generateOTP() {
+    return Math.floor(100000 + Math.random() * 900000).toString();
+  }
+
+  // ── SEND OTP ──
+  function sendOTP() {
+    const name = document.getElementById('signupName').value.trim();
+    const email = document.getElementById('signupEmail').value.trim();
+    const pw = document.getElementById('signupPassword').value;
+
+    let valid = true;
+    if (!name) { showErr('nameErr', 'Please enter your full name'); valid = false; }
+    if (!email || !/^\S+@\S+\.\S+$/.test(email)) { showErr('emailErr', 'Enter a valid email address'); valid = false; }
+    if (pw.length < 8) { showErr('pwErr', 'Password must be at least 8 characters'); valid = false; }
+    if (!valid) return;
+
+    if (users[email]) { showErr('emailErr', 'This email is already registered. Please log in.'); return; }
+
+    // Simulate OTP send
+    generatedOTP = generateOTP();
+    otpVerified = false;
+    otpSent = true;
+
+    document.getElementById('otpSection').classList.add('show');
+    document.getElementById('sendOtpBtn').textContent = '📨 Resend OTP';
+    document.querySelectorAll('.otp-input').forEach(i => { i.value = ''; i.classList.remove('filled'); });
+    document.getElementById('signupBtnText').textContent = 'Verify & Create Account →';
+
+    // Show simulated OTP in toast (in real app this goes to email)
+    showToast(`OTP sent! (Demo OTP: ${generatedOTP})`, 'success');
+
+    startTimer(60);
+  }
+
+  function resendOTP() {
+    sendOTP();
+  }
+
+  // ── OTP TIMER ──
+  function startTimer(seconds) {
+    clearInterval(otpTimer);
+    otpSeconds = seconds;
+    const resend = document.getElementById('resendBtn');
+    resend.disabled = true;
+    updateTimer();
+    otpTimer = setInterval(() => {
+      otpSeconds--;
+      updateTimer();
+      if (otpSeconds <= 0) {
+        clearInterval(otpTimer);
+        resend.disabled = false;
+        document.getElementById('timerText').textContent = 'OTP expired. Please resend.';
+      }
+    }, 1000);
+  }
+
+  function updateTimer() {
+    if (otpSeconds > 0) {
+      document.getElementById('timerText').innerHTML = `OTP expires in <span>${otpSeconds}s</span>`;
+    }
+  }
+
+  // ── OTP INPUT BOXES ──
+  function otpInput(el, idx) {
+    el.value = el.value.replace(/[^0-9]/g, '');
+    el.classList.toggle('filled', el.value !== '');
+    if (el.value && idx < 5) {
+      document.querySelectorAll('.otp-input')[idx + 1].focus();
+    }
+    // Auto verify when all filled
+    const vals = [...document.querySelectorAll('.otp-input')].map(i => i.value);
+    if (vals.every(v => v !== '')) verifyOTPSilent(vals.join(''));
+  }
+
+  function otpBack(e, idx) {
+    if (e.key === 'Backspace') {
+      const inputs = document.querySelectorAll('.otp-input');
+      if (!inputs[idx].value && idx > 0) {
+        inputs[idx - 1].value = '';
+        inputs[idx - 1].classList.remove('filled');
+        inputs[idx - 1].focus();
+      }
+    }
+  }
+
+  function verifyOTPSilent(entered) {
+    if (otpSeconds <= 0) {
+      document.getElementById('otpErr').textContent = 'OTP expired. Please resend.';
+      document.getElementById('otpErr').style.display = 'block';
+      otpVerified = false;
+      return;
+    }
+    if (entered === generatedOTP) {
+      otpVerified = true;
+      document.getElementById('otpErr').style.display = 'none';
+      document.querySelectorAll('.otp-input').forEach(i => i.style.borderColor = 'rgba(0,255,204,0.5)');
+      showToast('OTP verified! ✅', 'success');
+    } else {
+      otpVerified = false;
+    }
+  }
+
+  // ── HANDLE SIGNUP ──
+  function handleSignup() {
+    if (!otpSent) { sendOTP(); return; }
+
+    const name  = document.getElementById('signupName').value.trim();
+    const email = document.getElementById('signupEmail').value.trim();
+    const pw    = document.getElementById('signupPassword').value;
+
+    // Validate
+    let valid = true;
+    if (!name) { showErr('nameErr', 'Please enter your full name'); valid = false; }
+    if (!email || !/^\S+@\S+\.\S+$/.test(email)) { showErr('emailErr', 'Enter a valid email'); valid = false; }
+    if (pw.length < 8) { showErr('pwErr', 'Password must be at least 8 characters'); valid = false; }
+    if (!valid) return;
+
+    if (!otpVerified) {
+      const entered = [...document.querySelectorAll('.otp-input')].map(i => i.value).join('');
+      if (entered.length < 6) { showToast('Please enter the 6-digit OTP', 'error'); return; }
+      if (entered !== generatedOTP) {
+        document.getElementById('otpErr').textContent = 'Incorrect OTP. Please try again.';
+        document.getElementById('otpErr').style.display = 'block';
+        return;
+      }
+      if (otpSeconds <= 0) { showToast('OTP expired. Please resend.', 'error'); return; }
+      otpVerified = true;
+    }
+
+    // Simulate loading
+    setLoading('signupBtn', 'signupSpinner', 'signupBtnText', true);
+
+    setTimeout(() => {
+      // Save user
+      users[email] = { name, password: pw };
+      clearInterval(otpTimer);
+      setLoading('signupBtn', 'signupSpinner', 'signupBtnText', false, '');
+      document.getElementById('signupStep1').style.display = 'none';
+      document.getElementById('signupSuccess').classList.add('show');
+      // Auto-redirect after 3s
+      setTimeout(goToDashboard, 3000);
+    }, 1500);
+  }
+
+  // ── HANDLE LOGIN ──
+  function handleLogin() {
+    const email = document.getElementById('loginEmail').value.trim();
+    const pw    = document.getElementById('loginPassword').value;
+
+    let valid = true;
+    if (!email || !/^\S+@\S+\.\S+$/.test(email)) { showErr('loginEmailErr', 'Enter a valid email address'); valid = false; }
+    if (!pw) { showErr('loginPwErr', 'Please enter your password'); valid = false; }
+    if (!valid) return;
+
+    setLoading('loginBtn', 'loginSpinner', null, true);
+
+    setTimeout(() => {
+      setLoading('loginBtn', 'loginSpinner', null, false);
+      const user = users[email];
+      if (!user) {
+        showErr('loginEmailErr', 'No account found with this email. Please sign up.');
+        return;
+      }
+      if (user.password !== pw) {
+        showErr('loginPwErr', 'Incorrect password. Please try again.');
+        return;
+      }
+      showToast(`Welcome back, ${user.name}! 👋`, 'success');
+      setTimeout(goToDashboard, 1500);
+    }, 1200);
+  }
+
+  function goToDashboard() {
+    window.location.href = 'profile.html';
+  }
+
+  // ── LOADING STATE ──
+  function setLoading(btnId, spinnerId, textId, loading, text) {
+    const btn = document.getElementById(btnId);
+    const spinner = document.getElementById(spinnerId);
+    btn.disabled = loading;
+    spinner.style.display = loading ? 'block' : 'none';
+    if (textId) {
+      const txtEl = document.getElementById(textId);
+      if (txtEl) txtEl.style.display = loading ? 'none' : 'block';
+      if (!loading && text !== undefined) txtEl.textContent = text || txtEl.textContent;
+    }
+  }
+
+  // ── STARFIELD ──
+  const canvas = document.getElementById('bg');
+  const ctx = canvas.getContext('2d');
+  let stars = [];
+
+  function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+
+  function initStars() {
+    stars = Array.from({ length: 120 }, () => ({
+      x: Math.random() * canvas.width,
+      y: Math.random() * canvas.height,
+      r: Math.random() * 1 + 0.2,
+      alpha: Math.random() * 0.5 + 0.1,
+      speed: Math.random() * 0.2 + 0.03,
+      dir: Math.random() * Math.PI * 2,
+    }));
+  }
+
+  function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    stars.forEach(s => {
+      ctx.beginPath();
+      ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(200,230,255,${s.alpha})`;
+      ctx.fill();
+      s.x += Math.cos(s.dir) * s.speed;
+      s.y += Math.sin(s.dir) * s.speed;
+      if (s.x < 0) s.x = canvas.width;
+      if (s.x > canvas.width) s.x = 0;
+      if (s.y < 0) s.y = canvas.height;
+      if (s.y > canvas.height) s.y = 0;
+      s.alpha += (Math.random() - 0.5) * 0.015;
+      s.alpha = Math.max(0.05, Math.min(0.65, s.alpha));
+    });
+    requestAnimationFrame(draw);
+  }
+
+  window.addEventListener('resize', () => { resize(); initStars(); });
+  resize(); initStars(); draw();
+</script>
+</body>
+</html>
