@@ -482,7 +482,7 @@
   <div class="suc-emoji">🎉</div>
   <div class="suc-title">Profile Complete!</div>
   <div class="suc-sub">Welcome to PathForge, <strong id="sucName">Student</strong>!<br>Your personalized roadmap is ready.</div>
-  <button class="btn-go" onclick="window.location.href='index.html'">⚡ Go to My Roadmap</button>
+  <button class="btn-go" onclick="window.location.href='/dashboard.html'">⚡ Go to My Roadmap</button>
 </div>
 
 <div id="toast"></div>
@@ -594,16 +594,46 @@
   var intArr = [];
   for (var i = 0; i < intCards.length; i++) intArr.push(intCards[i].querySelector('.int-label').textContent);
 
+  // Save to localStorage as before
   localStorage.setItem('pf_name',      name);
   localStorage.setItem('pf_emoji',     curEmoji);
   localStorage.setItem('pf_edu',       edu);
   localStorage.setItem('pf_city',      city);
-  localStorage.setItem('pf_goals',     goalArr.join(', ') || '—');
-  localStorage.setItem('pf_interests', intArr.join(', ')  || '—');
+  localStorage.setItem('pf_goals',     goalArr.join(', ') || '-');
+  localStorage.setItem('pf_interests', intArr.join(', ')  || '-');
 
+  // Get userId from localStorage
+  var userId = localStorage.getItem('pf_userId');
+
+  // Save to MySQL
+  fetch('/api/profile', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      userId:    userId,
+      emoji:     curEmoji,
+      education: edu,
+      city:      city,
+      interests: intArr.join(', ') || '-',
+      goals:     goalArr.join(', ') || '-'
+    })
+  })
+  .then(function(res) { return res.json(); })
+  .then(function(data) {
+    if (data.success) {
+      console.log('Profile saved to MySQL!');
+    } else {
+      console.log('Profile save error:', data.message);
+    }
+  })
+  .catch(function(err) {
+    console.log('Error saving profile:', err);
+  });
+
+  // Show success and redirect
   document.getElementById('sucName').textContent = name;
   document.getElementById('successOverlay').classList.add('show');
-  setTimeout(function() { window.location.href = 'index.html'; }, 3500);
+  setTimeout(function() { window.location.href = '/dashboard.html'; }, 3500);
 }
 </script>
 </body>

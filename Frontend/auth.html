@@ -904,80 +904,125 @@
       otpVerified = false;
     }
   }
-
-  // ── HANDLE SIGNUP ──
+//Handlesignup
   function handleSignup() {
-    if (!otpSent) { sendOTP(); return; }
+  if (!otpSent) { sendOTP(); return; }
 
-    const name  = document.getElementById('signupName').value.trim();
-    const email = document.getElementById('signupEmail').value.trim();
-    const pw    = document.getElementById('signupPassword').value;
+  const name  = document.getElementById('signupName').value.trim();
+  const email = document.getElementById('signupEmail').value.trim();
+  const pw    = document.getElementById('signupPassword').value;
 
-    // Validate
-    let valid = true;
-    if (!name) { showErr('nameErr', 'Please enter your full name'); valid = false; }
-    if (!email || !/^\S+@\S+\.\S+$/.test(email)) { showErr('emailErr', 'Enter a valid email'); valid = false; }
-    if (pw.length < 8) { showErr('pwErr', 'Password must be at least 8 characters'); valid = false; }
-    if (!valid) return;
+  let valid = true;
+  if (!name) { showErr('nameErr', 'Please enter your full name'); valid = false; }
+  if (!email || !/^\S+@\S+\.\S+$/.test(email)) { showErr('emailErr', 'Enter a valid email'); valid = false; }
+  if (pw.length < 8) { showErr('pwErr', 'Password must be at least 8 characters'); valid = false; }
+  if (!valid) return;
 
-    if (!otpVerified) {
-      const entered = [...document.querySelectorAll('.otp-input')].map(i => i.value).join('');
-      if (entered.length < 6) { showToast('Please enter the 6-digit OTP', 'error'); return; }
-      if (entered !== generatedOTP) {
-        document.getElementById('otpErr').textContent = 'Incorrect OTP. Please try again.';
-        document.getElementById('otpErr').style.display = 'block';
-        return;
-      }
-      if (otpSeconds <= 0) { showToast('OTP expired. Please resend.', 'error'); return; }
-      otpVerified = true;
+  if (!otpVerified) {
+    const entered = [...document.querySelectorAll('.otp-input')].map(i => i.value).join('');
+    if (entered.length < 6) { showToast('Please enter the 6-digit OTP', 'error'); return; }
+    if (entered !== generatedOTP) {
+      document.getElementById('otpErr').textContent = 'Incorrect OTP. Please try again.';
+      document.getElementById('otpErr').style.display = 'block';
+      return;
     }
+    if (otpSeconds <= 0) { showToast('OTP expired. Please resend.', 'error'); return; }
+    otpVerified = true;
+  }
 
-    // Simulate loading
-    setLoading('signupBtn', 'signupSpinner', 'signupBtnText', true);
+  setLoading('signupBtn', 'signupSpinner', 'signupBtnText', true);
 
-    setTimeout(() => {
-      // Save user
-      users[email] = { name, password: pw };
+  // ── SAVE TO MYSQL ──
+  fetch('/api/signup', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name, email, password: pw })
+  })
+  .then(res => res.json())
+  .then(data => {
+    setLoading('signupBtn', 'signupSpinner', 'signupBtnText', false, '');
+    if (data.success) {
+      // Save userId to localStorage for later use
+      localStorage.setItem('pf_userId', data.userId);
+      localStorage.setItem('pf_name', name);
       clearInterval(otpTimer);
-      setLoading('signupBtn', 'signupSpinner', 'signupBtnText', false, '');
       document.getElementById('signupStep1').style.display = 'none';
       document.getElementById('signupSuccess').classList.add('show');
-      // Auto-redirect after 3s
       setTimeout(goToDashboard, 3000);
-    }, 1500);
-  }
+    } else {
+      showErr('emailErr', data.message || 'Email already exists');
+    }
+  })
+  .catch(err => {
+    setLoading('signupBtn', 'signupSpinner', 'signupBtnText', false, '');
+    showToast('Something went wrong. Try again.', 'error');
+  });
+}
 
   // ── HANDLE LOGIN ──
-  function handleLogin() {
-    const email = document.getElementById('loginEmail').value.trim();
-    const pw    = document.getElementById('loginPassword').value;
+ function handleLogin() {
+  const email = document.getElementById('loginEmail').value.trim();
+  const pw    = document.getElementById('loginPassword').value;
 
-    let valid = true;
-    if (!email || !/^\S+@\S+\.\S+$/.test(email)) { showErr('loginEmailErr', 'Enter a valid email address'); valid = false; }
-    if (!pw) { showErr('loginPwErr', 'Please enter your password'); valid = false; }
-    if (!valid) return;
+  let valid = true;
+  if (!email || !/^\S+@\S+\.\S+$/.test(email)) { showErr('loginEmailErr', 'Enter a valid email address'); valid = false; }
+  if (!pw) { showErr('loginPwErr', 'Please enter your password'); valid = false; }
+  if (!valid) return;
 
-    setLoading('loginBtn', 'loginSpinner', null, true);
+  setLoading('loginBtn', 'loginSpinner', null, true);
 
-    setTimeout(() => {
-      setLoading('loginBtn', 'loginSpinner', null, false);
-      const user = users[email];
-      if (!user) {
-        showErr('loginEmailErr', 'No account found with this email. Please sign up.');
-        return;
-      }
-      if (user.password !== pw) {
-        showErr('loginPwErr', 'Incorrect password. Please try again.');
-        return;
-      }
-      showToast(`Welcome back, ${user.name}! 👋`, 'success');
-      setTimeout(goToDashboard, 1500);
-    }, 1200);
-  }
+  // ── CHECK FROM MYSQL ──
+  fetch('/api/login', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email, password: pw })
+  })
+  .then(res => res.json())
+  .then(data => {
+    setLoading('loginBtn', 'loginSpinner', null, false);
+    if (data.success) {
+      // Save userId and name to localStorage
+      localStorage.setItem('pf_userId', data.userId);
+      localStorage.setItem('pf_name', data.name);
+      showToast(`Welcome back, ${data.name}! 👋`, 'success');
+      setTimeout(function() {
+  // Check MySQL if profile exists for this user
+  fetch('/api/get-profile?userId=' + data.userId)
+  .then(function(res) { return res.json(); })
+  .then(function(profileData) {
+    if (profileData.exists) {
+      // Profile exists in DB — load it to localStorage and go to dashboard
+      localStorage.setItem('pf_emoji',     profileData.emoji     || '🎓');
+      localStorage.setItem('pf_edu',       profileData.education || '-');
+      localStorage.setItem('pf_city',      profileData.city      || '-');
+      localStorage.setItem('pf_goals',     profileData.goals     || '-');
+      localStorage.setItem('pf_interests', profileData.interests || '-');
+      window.location.href = '/dashboard.html';
+    } else {
+      // No profile in DB — go to profile page
+      window.location.href = '/profile.html';
+    }
+  })
+  .catch(function() {
+    window.location.href = '/profile.html';
+  });
+}, 1500);
+    } else {
+      showErr('loginEmailErr', data.message || 'Invalid email or password');
+    }
+  })
+  .catch(err => {
+    setLoading('loginBtn', 'loginSpinner', null, false);
+    showToast('Something went wrong. Try again.', 'error');
+  });
+}
 
   function goToDashboard() {
-    window.location.href = 'profile.html';
-  }
+  switchTab('login');
+  document.getElementById('signupPanel').classList.remove('active');
+  document.getElementById('loginPanel').classList.add('active');
+  showToast('Account created! Please log in to continue.', 'success');
+}
 
   // ── LOADING STATE ──
   function setLoading(btnId, spinnerId, textId, loading, text) {

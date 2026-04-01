@@ -489,9 +489,109 @@
   <div class="tab-pane" id="tabColleges"><div class="info-grid" id="collegesContent"></div></div>
   <div class="tab-pane" id="tabCountries"><div class="info-grid" id="countriesContent"></div></div>
   <div class="tab-pane" id="tabJobs"><div class="job-list" id="jobsContent"></div></div>
+  
+
+<!-- FEEDBACK BUTTON -->
+<div id="feedbackBtnWrap" style="display:none; text-align:center; margin-top:2.5rem; padding-bottom:1rem;">
+  <button onclick="openFeedback()" style="
+    background:rgba(0,255,204,0.08);
+    color:#00ffcc;
+    border:1px solid rgba(0,255,204,0.3);
+    border-radius:12px;
+    padding:0.85rem 2rem;
+    font-family:'Outfit',sans-serif;
+    font-size:0.95rem;
+    font-weight:600;
+    cursor:pointer;
+    transition:all 0.2s;
+  ">
+    🌟 Rate Your Experience
+  </button>
+  <div style="font-size:0.75rem; color:#5a6a85; margin-top:0.5rem;">Takes only 30 seconds!</div>
+</div>
 </div>
 
+
 <div id="toast"></div>
+
+<!-- FEEDBACK POPUP -->
+<div id="feedbackOverlay" style="display:none; position:fixed; inset:0; z-index:999; background:rgba(3,5,10,0.95); align-items:center; justify-content:center;">
+  <div style="background:#0a0e18; border:1px solid rgba(0,255,204,0.2); border-radius:18px; padding:2.5rem; width:100%; max-width:480px; margin:1rem; position:relative;">
+    <button onclick="closeFeedback()" style="position:absolute; top:1rem; right:1rem; background:none; border:none; color:#5a6a85; font-size:1.2rem; cursor:pointer;">✕</button>
+    <div style="font-family:'Bebas Neue',sans-serif; font-size:1.8rem; letter-spacing:0.05em; margin-bottom:0.3rem; color:#f0f4ff;">Rate Your Experience 🌟</div>
+    <div style="font-size:0.85rem; color:#5a6a85; margin-bottom:1.8rem;">Help us improve PathForge — takes only 30 seconds!</div>
+
+    <!-- Q1 -->
+    <div style="margin-bottom:1.2rem;">
+      <div style="font-size:0.82rem; font-weight:600; color:#5a6a85; margin-bottom:0.5rem; text-transform:uppercase; letter-spacing:0.08em;">1. Was the roadmap accurate and helpful?</div>
+      <div style="display:flex; gap:0.5rem;">
+        <button class="fb-btn" onclick="selectRating('q1',1,this)">1</button>
+        <button class="fb-btn" onclick="selectRating('q1',2,this)">2</button>
+        <button class="fb-btn" onclick="selectRating('q1',3,this)">3</button>
+        <button class="fb-btn" onclick="selectRating('q1',4,this)">4</button>
+        <button class="fb-btn" onclick="selectRating('q1',5,this)">5</button>
+      </div>
+    </div>
+
+    <!-- Q2 -->
+    <div style="margin-bottom:1.2rem;">
+      <div style="font-size:0.82rem; font-weight:600; color:#5a6a85; margin-bottom:0.5rem; text-transform:uppercase; letter-spacing:0.08em;">2. Were the college recommendations relevant?</div>
+      <div style="display:flex; gap:0.5rem;">
+        <button class="fb-btn" onclick="selectRating('q2',1,this)">1</button>
+        <button class="fb-btn" onclick="selectRating('q2',2,this)">2</button>
+        <button class="fb-btn" onclick="selectRating('q2',3,this)">3</button>
+        <button class="fb-btn" onclick="selectRating('q2',4,this)">4</button>
+        <button class="fb-btn" onclick="selectRating('q2',5,this)">5</button>
+      </div>
+    </div>
+
+    <!-- Q3 -->
+    <div style="margin-bottom:1.2rem;">
+      <div style="font-size:0.82rem; font-weight:600; color:#5a6a85; margin-bottom:0.5rem; text-transform:uppercase; letter-spacing:0.08em;">3. How easy was it to navigate the platform?</div>
+      <div style="display:flex; gap:0.5rem;">
+        <button class="fb-btn" onclick="selectRating('q3',1,this)">1</button>
+        <button class="fb-btn" onclick="selectRating('q3',2,this)">2</button>
+        <button class="fb-btn" onclick="selectRating('q3',3,this)">3</button>
+        <button class="fb-btn" onclick="selectRating('q3',4,this)">4</button>
+        <button class="fb-btn" onclick="selectRating('q3',5,this)">5</button>
+      </div>
+    </div>
+
+    <!-- Q4 -->
+    <div style="margin-bottom:1.2rem;">
+      <div style="font-size:0.82rem; font-weight:600; color:#5a6a85; margin-bottom:0.5rem; text-transform:uppercase; letter-spacing:0.08em;">4. Were the part-time job suggestions useful?</div>
+      <div style="display:flex; gap:0.5rem;">
+        <button class="fb-btn" onclick="selectRating('q4',1,this)">1</button>
+        <button class="fb-btn" onclick="selectRating('q4',2,this)">2</button>
+        <button class="fb-btn" onclick="selectRating('q4',3,this)">3</button>
+        <button class="fb-btn" onclick="selectRating('q4',4,this)">4</button>
+        <button class="fb-btn" onclick="selectRating('q4',5,this)">5</button>
+      </div>
+    </div>
+
+    <!-- Q5 -->
+    <div style="margin-bottom:1.5rem;">
+      <div style="font-size:0.82rem; font-weight:600; color:#5a6a85; margin-bottom:0.5rem; text-transform:uppercase; letter-spacing:0.08em;">5. What feature would you like us to add?</div>
+      <input type="text" id="fb_q5" placeholder="e.g. AI mock interviews, mobile app..." style="width:100%; background:#111827; border:1px solid rgba(255,255,255,0.07); border-radius:8px; padding:0.72rem 1rem; color:#f0f4ff; font-family:'Outfit',sans-serif; font-size:0.9rem; outline:none;"/>
+    </div>
+
+    <button onclick="submitFeedback()" style="width:100%; background:#00ffcc; color:#000; border:none; border-radius:8px; padding:0.9rem; font-family:'Outfit',sans-serif; font-size:1rem; font-weight:700; cursor:pointer;">
+      Submit Feedback 🚀
+    </button>
+  </div>
+</div>
+
+<style>
+.fb-btn {
+  flex:1; padding:0.5rem; background:#111827;
+  border:1px solid rgba(255,255,255,0.07);
+  border-radius:8px; color:#5a6a85;
+  font-family:'Outfit',sans-serif; font-size:0.95rem;
+  font-weight:600; cursor:pointer; transition:all 0.2s;
+}
+.fb-btn:hover { border-color:rgba(0,255,204,0.3); color:#f0f4ff; }
+.fb-btn.selected { background:rgba(0,255,204,0.1); border-color:rgba(0,255,204,0.5); color:#00ffcc; }
+</style>
 
 <script>
   // ── PROFILE LOAD ──
@@ -530,20 +630,25 @@
   }
 
   function switchTab(btn, paneId) {
-    document.querySelectorAll('.tab').forEach(function(t) { t.classList.remove('active'); });
-    document.querySelectorAll('.tab-pane').forEach(function(p) { p.classList.remove('active'); });
-    btn.classList.add('active');
-    document.getElementById(paneId).classList.add('active');
-  }
+  document.querySelectorAll('.tab').forEach(function(t) { t.classList.remove('active'); });
+  document.querySelectorAll('.tab-pane').forEach(function(p) { p.classList.remove('active'); });
+  btn.classList.add('active');
+  document.getElementById(paneId).classList.add('active');
+  
+  
+}
 
   function resetSearch() {
-    document.getElementById('heroSection').style.display = 'block';
-    document.getElementById('resultWrap').classList.remove('show');
-    document.getElementById('careerGoal').value = '';
-    window.scrollTo(0, 0);
-  }
+  document.getElementById('heroSection').style.display = 'block';
+  document.getElementById('resultWrap').classList.remove('show');
+  document.getElementById('careerGoal').value = '';
+  window.scrollTo(0, 0);
+  
+}
 
   var loaderInterval = null;
+  
+
   function animateLoader() {
     var steps = ['ls1','ls2','ls3','ls4','ls5'];
     var idx = 0;
@@ -1196,9 +1301,30 @@
       } else {
         data = buildGenericRoadmap(goal);
       }
+      // ── SAVE TO MYSQL ROADMAP HISTORY ──
+var userId = localStorage.getItem('pf_userId');
+fetch('/api/roadmap-history', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    userId:          userId,
+    careerGoal:      goal,
+    categoryMatched: cat || 'generic'
+  })
+})
+.then(function(res) { return res.json(); })
+.then(function(response) {
+  console.log('Roadmap history saved!', response.message);
+})
+.catch(function(err) {
+  console.log('Error saving history:', err);
+});
       renderResults(data, goal);
+      // Show feedback popup after 5 seconds
+      
     }, 3500);
   }
+  
 
   // ── RENDER RESULTS ──
   function renderResults(data, goal) {
@@ -1290,7 +1416,59 @@
     document.querySelectorAll('.tab')[0].classList.add('active');
     document.getElementById('tabRoadmap').classList.add('active');
     window.scrollTo({ top: 0, behavior: 'smooth' });
+    document.getElementById('feedbackBtnWrap').style.display = 'block';
+    
   }
+  // ── FEEDBACK ──
+var feedbackRatings = { q1: 0, q2: 0, q3: 0, q4: 0 };
+
+function selectRating(question, value, btn) {
+  feedbackRatings[question] = value;
+  var parent = btn.parentElement;
+  var btns = parent.querySelectorAll('.fb-btn');
+  btns.forEach(function(b) { b.classList.remove('selected'); });
+  btn.classList.add('selected');
+}
+
+function openFeedback() {
+  document.getElementById('feedbackOverlay').style.display = 'flex';
+}
+
+function closeFeedback() {
+  document.getElementById('feedbackOverlay').style.display = 'none';
+}
+
+function submitFeedback() {
+  if (!feedbackRatings.q1 || !feedbackRatings.q2 || !feedbackRatings.q3 || !feedbackRatings.q4) {
+    showToast('Please rate all 4 questions!');
+    return;
+  }
+  var q5 = document.getElementById('fb_q5').value.trim() || '-';
+  var userId = localStorage.getItem('pf_userId');
+
+  fetch('/api/feedback', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      userId:              userId,
+      q1RoadmapAccurate:   feedbackRatings.q1,
+      q2CollegesRelevant:  feedbackRatings.q2,
+      q3EasyToNavigate:    feedbackRatings.q3,
+      q4JobsRelevant:      feedbackRatings.q4,
+      q5FeatureSuggestion: q5
+    })
+  })
+  .then(function(res) { return res.json(); })
+  .then(function(response) {
+  if (response.success) {
+    closeFeedback();
+    showToast('Thank you for your feedback! 🙏');
+  }
+})
+  .catch(function(err) {
+    console.log('Feedback error:', err);
+  });
+}
 </script>
 </body>
 </html>
