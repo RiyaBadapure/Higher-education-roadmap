@@ -232,7 +232,7 @@
 
 <nav>
   <a href="welcome.html" class="logo">Path<em>Forge</em></a>
-  <a href="index.html" class="skip-link">Skip for now →</a>
+  <a href="dashboard.html" class="skip-link">Skip for now →</a>
 </nav>
 
 <div class="progress-wrap">
@@ -594,7 +594,7 @@
   var intArr = [];
   for (var i = 0; i < intCards.length; i++) intArr.push(intCards[i].querySelector('.int-label').textContent);
 
-  // Save to localStorage as before
+  // Save to localStorage
   localStorage.setItem('pf_name',      name);
   localStorage.setItem('pf_emoji',     curEmoji);
   localStorage.setItem('pf_edu',       edu);
@@ -602,10 +602,12 @@
   localStorage.setItem('pf_goals',     goalArr.join(', ') || '-');
   localStorage.setItem('pf_interests', intArr.join(', ')  || '-');
 
-  // Get userId from localStorage
   var userId = localStorage.getItem('pf_userId');
 
-  // Save to MySQL
+  document.getElementById('sucName').textContent = name;
+  document.getElementById('successOverlay').classList.add('show');
+
+  // Save to MySQL FIRST then redirect
   fetch('/api/profile', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -620,20 +622,17 @@
   })
   .then(function(res) { return res.json(); })
   .then(function(data) {
-    if (data.success) {
-      console.log('Profile saved to MySQL!');
-    } else {
-      console.log('Profile save error:', data.message);
-    }
+    // Only redirect AFTER MySQL save is confirmed
+    setTimeout(function() {
+      window.location.href = '/dashboard.html';
+    }, 3500);
   })
   .catch(function(err) {
-    console.log('Error saving profile:', err);
+    // Even if MySQL fails redirect anyway
+    setTimeout(function() {
+      window.location.href = '/dashboard.html';
+    }, 3500);
   });
-
-  // Show success and redirect
-  document.getElementById('sucName').textContent = name;
-  document.getElementById('successOverlay').classList.add('show');
-  setTimeout(function() { window.location.href = '/dashboard.html'; }, 3500);
 }
 </script>
 </body>

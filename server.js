@@ -3,14 +3,16 @@ const app = express();
 const PORT = 3000;
 const db = require('./db');
 
-// Import routes
 const roadmapRoutes = require("./routes/roadmap");
 
-// Middleware
 app.use(express.json());
 app.use(express.static('./frontend', { index: false }));
 
-// ── SIGNUP ROUTE ──
+// ── This FIRST ──
+app.use("/api", roadmapRoutes);
+
+// ── ALL YOUR ROUTES AFTER ──
+
 app.post('/api/signup', (req, res) => {
   const { name, email, password } = req.body;
   const query = 'INSERT INTO users (name, email, password) VALUES (?, ?, ?)';
@@ -23,7 +25,6 @@ app.post('/api/signup', (req, res) => {
   });
 });
 
-// ── LOGIN ROUTE ──
 app.post('/api/login', (req, res) => {
   const { email, password } = req.body;
   const query = 'SELECT * FROM users WHERE email = ? AND password = ?';
@@ -36,7 +37,18 @@ app.post('/api/login', (req, res) => {
   });
 });
 
-// ── GET PROFILE ROUTE ──
+app.post('/api/profile', (req, res) => {
+  const { userId, emoji, education, city, interests, goals } = req.body;
+  const query = 'INSERT INTO profiles (user_id, emoji, education, city, interests, goals) VALUES (?, ?, ?, ?, ?, ?)';
+  db.query(query, [userId, emoji, education, city, interests, goals], (err, result) => {
+    if (err) {
+      res.json({ success: false, message: 'Error saving profile' });
+    } else {
+      res.json({ success: true, message: 'Profile saved successfully' });
+    }
+  });
+});
+
 app.get('/api/get-profile', (req, res) => {
   const userId = req.query.userId;
   const query = 'SELECT * FROM profiles WHERE user_id = ?';
@@ -58,14 +70,11 @@ app.get('/api/get-profile', (req, res) => {
   });
 });
 
-
-// ── ROADMAP HISTORY ROUTE ──
 app.post('/api/roadmap-history', (req, res) => {
   const { userId, careerGoal, categoryMatched } = req.body;
   const query = 'INSERT INTO roadmap_history (user_id, career_goal, category_matched) VALUES (?, ?, ?)';
   db.query(query, [userId, careerGoal, categoryMatched], (err, result) => {
     if (err) {
-      console.log('Roadmap history error:', err);
       res.json({ success: false, message: 'Error saving history' });
     } else {
       res.json({ success: true, message: 'History saved successfully' });
@@ -73,7 +82,6 @@ app.post('/api/roadmap-history', (req, res) => {
   });
 });
 
-// ── FEEDBACK ROUTE ──
 app.post('/api/feedback', (req, res) => {
   const { userId, q1RoadmapAccurate, q2CollegesRelevant, q3EasyToNavigate, q4JobsRelevant, q5FeatureSuggestion } = req.body;
   const query = 'INSERT INTO feedback (user_id, q1_roadmap_accurate, q2_colleges_relevant, q3_easy_to_navigate, q4_jobs_relevant, q5_feature_suggestion) VALUES (?, ?, ?, ?, ?, ?)';
@@ -86,10 +94,6 @@ app.post('/api/feedback', (req, res) => {
   });
 });
 
-// ── This should always be LAST ──
-app.use("/api", roadmapRoutes);
-
-// ── PAGE ROUTES ──
 app.get("/", (req, res) => {
   res.sendFile(__dirname + "/frontend/welcome.html");
 });
@@ -106,7 +110,6 @@ app.get('/auth.html', (req, res) => {
   res.sendFile(__dirname + '/frontend/auth.html');
 });
 
-// Start server
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
 });
