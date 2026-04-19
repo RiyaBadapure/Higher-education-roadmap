@@ -1,13 +1,12 @@
 const express = require("express");
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 const db = require('./config/db');
 // const db = require('./db');
 
 const roadmapRoutes = require("./routes/roadmap");
 
 app.use(express.json());
-// app.use(express.static('./frontend', { index: false }));
 const path = require('path');
 
 app.use(express.static(path.join(__dirname, '../Frontend')));
@@ -97,23 +96,6 @@ app.post('/api/feedback', (req, res) => {
     }
   });
 });
-
-// app.get("/", (req, res) => {
-//   res.sendFile(__dirname + "/frontend/welcome.html");
-// });
-
-// app.get('/profile.html', (req, res) => {
-//   res.sendFile(__dirname + '/frontend/profile.html');
-// });
-
-// app.get('/dashboard.html', (req, res) => {
-//   res.sendFile(__dirname + '/frontend/dashboard.html');
-// });
-
-// app.get('/auth.html', (req, res) => {
-//   res.sendFile(__dirname + '/frontend/auth.html');
-  
-// });
 
 
 
